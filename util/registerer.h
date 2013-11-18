@@ -2,19 +2,15 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/thread/thread.hpp>
+#include <boost/thread/once.hpp>
 #include "../base/macros.h"
 using namespace std;
 
 #ifndef UTIL_REGISTERER_H_
 #define UTIL_REGISTERER_H_
 
-static inline void OnceInit(bool * is_initial, void (*DoInit)()) {
-  if (*is_initial) {
-    return;
-  }
-  *is_initial = true;
-  DoInit();
-}
 
 // T is a function pointer.
 template<class T>
@@ -24,7 +20,7 @@ class Registerer {
 
   Registerer(const string& name, const string& filename, T object)
       : name_(name) {
-    OnceInit(&module_init_, InitModule);
+    boost::call_once(module_init_, InitModule);
     pair<typename ObjectMap::iterator, bool> p = objects_->insert(
         make_pair(name, ObjectFilePair(object, filename)));
     if (!p.second) {
@@ -41,18 +37,18 @@ class Registerer {
 
   // Return the object function creator by name
   static T GetByName(const string& name) {
-    OnceInit(&module_init_, InitModule);
+    boost::call_once(module_init_, InitModule);
     return GetObjectFilePairByName(name).first;
   }
 
   // Return the object file name by name
   static string GetFileNameByName(const string& name) {
-    OnceInit(&module_init_, InitModule);
+    boost::call_once(module_init_, InitModule);
     return GetObjectFilePairByName(name).second;
   }
 
   static void GetNames(vector<string>* names) {
-    OnceInit(&module_init_, InitModule);
+    boost::call_once(module_init_, InitModule);
     names->clear();
     for (const auto& i : *objects_) {
       names->push_back(i.first);
@@ -69,12 +65,12 @@ class Registerer {
   }
 
   static const ObjectFilePair& GetObjectFilePairByName(const string& name) {
-    OnceInit(&module_init_, InitModule);
+    boost::call_once(module_init_, InitModule);
     typename ObjectMap::const_iterator item = objects_->find(name);
     return item->second;
   }
 
-  static bool module_init_;
+  static boost::once_flag module_init_;
   static ObjectMap* objects_;
   const string name_;
 
@@ -82,7 +78,7 @@ class Registerer {
 };
 
 template<class T>
-bool Registerer<T>::module_init_ = false;
+boost::once_flag Registerer<T>::module_init_ = BOOST_ONCE_INIT;
 
 template<class T>
 typename Registerer<T>::ObjectMap* Registerer<T>::objects_ = NULL;
