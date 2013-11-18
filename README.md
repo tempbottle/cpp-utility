@@ -18,7 +18,7 @@ some useful tool for cpp
   	// define a builder
   	class TermBuilder : public Builder {
   		public:
-  		virtual vuild builder(const char* sentence) {
+  		virtual void builder(const char* sentence) {
   			// your code here.
   		}
   	};
