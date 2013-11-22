@@ -1,3 +1,6 @@
+#ifndef UTIL_REGISTERER_H_
+#define UTIL_REGISTERER_H_
+
 #include <map>
 #include <string>
 #include <utility>
@@ -5,12 +8,8 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
-#include "../base/macros.h"
+#include "base/macros.h"
 using namespace std;
-
-#ifndef UTIL_REGISTERER_H_
-#define UTIL_REGISTERER_H_
-
 
 // T is a function pointer.
 template<class T>

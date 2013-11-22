@@ -7,8 +7,10 @@
 //============================================================================
 
 #include <iostream>
+#include <cassert>
 #include "base/macros.h"
 #include "util/registerer.h"
+#include "util/singleton.h"
 using namespace std;
 
 class Builder {
@@ -43,7 +45,16 @@ void TestRegister() {
   word_builder->Build("some builder");
 }
 
+void TestSingleton() {
+  int* ptr0 = Singleton<int>::Get();
+  int* ptr1 = Singleton<int>::Get();
+  assert(ptr0 == ptr1);
+  if (ptr0 == ptr1) {
+    cout << "equal address" << endl;
+  }
+}
 int main() {
   TestRegister();
+  TestSingleton();
   return 0;
 }
