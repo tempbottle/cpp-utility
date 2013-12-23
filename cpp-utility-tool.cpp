@@ -9,8 +9,11 @@
 #include <iostream>
 #include <cassert>
 #include "base/macros.h"
+#include "base/sysinfo.h"
+#include "base/timer.h"
 #include "util/registerer.h"
 #include "util/singleton.h"
+
 using namespace std;
 
 class Builder {
@@ -53,8 +56,18 @@ void TestSingleton() {
     cout << "equal address" << endl;
   }
 }
+
 int main() {
   TestRegister();
   TestSingleton();
+  printf("%d\n", NumCPUs());
+  printf("%lf\n", NominalCPUFrequency());
+  printf("%lf\n", CycleClockFrequency());
+  WallTimer wall_timer;
+  wall_timer.Start();
+  char text_buf[1024];
+  while(gets(text_buf)) {
+    printf("%s %lf %lld\n", text_buf, wall_timer.Get(), wall_timer.GetInMs());
+  }
   return 0;
 }
