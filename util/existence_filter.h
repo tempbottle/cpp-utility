@@ -35,7 +35,7 @@ class ExistenceFilter {
   // We generate 'k' separate internal hash values
   void Insert(uint64 hash);
 
-  // Checks if the given 'hash' was previously inserted int the filter
+  // Checks if the given 'hash' was previously inserted in the filter
   // It may return some false positives
   bool Exists(uint64 hash) const;
 
@@ -53,9 +53,10 @@ class ExistenceFilter {
 
   static bool ReadHeader(const char *buf, Header* header);
 
-  // Read Existence filter from buf[]
-  // Note that the returned ExsitenceFilter is immutable filter.
-  // Any mutable operations will destroy buf[].
+  // Create a new ExistenceFilter from buf. This function will
+  // not share buf's memory with the new ExistenceFilter.
+  // in other words, this function create a complete ExistenceFilter
+  // with its own memory.
   static ExistenceFilter* Read(const char *buf, size_t size);
 
  private:
