@@ -8,16 +8,18 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include "base/macros.h"
 using namespace std;
 
-// T is a function pointer.
+// T is a boost::function pointer.
 template<class T>
 class Registerer {
  public:
   typedef T ObjectType;
 
-  Registerer(const string& name, const string& filename, T object)
+  Registerer(const string& name, const string& filename, T* object)
       : name_(name) {
     boost::call_once(module_init_, InitModule);
     pair<typename ObjectMap::iterator, bool> p = objects_->insert(
@@ -35,7 +37,7 @@ class Registerer {
   }
 
   // Return the object function creator by name
-  static T GetByName(const string& name) {
+  static T* GetByName(const string& name) {
     boost::call_once(module_init_, InitModule);
     return GetObjectFilePairByName(name).first;
   }
@@ -56,7 +58,7 @@ class Registerer {
   }
 
  private:
-  typedef pair<T, string> ObjectFilePair;
+  typedef pair<T*, string> ObjectFilePair;
   typedef map<string, ObjectFilePair> ObjectMap;
 
   static void InitModule() {
@@ -87,7 +89,13 @@ template<class R>
 class RegistererWrapper {
  public:
   template<class N, class F>
-  RegistererWrapper(const N& name, const F& file, typename R::Creator creator)
+  RegistererWrapper(const N& name, const F& file,
+                    typename R::CreatorFunctionPtr creator)
+      : wrapped_(name, file, creator) {
+  }
+
+  template<class N, class F>
+  RegistererWrapper(const N& name, const F& file, typename R::Creator* creator)
       : wrapped_(name, file, creator) {
   }
 
@@ -98,16 +106,22 @@ class RegistererWrapper {
 };
 
 template<class base>
-class ClassRegisterer : public Registerer<base* (*)()> {
+class ClassRegisterer : public Registerer<boost::function<base* ()>> {
  public:
   typedef base CreateType;
-  typedef CreateType* (*Creator)();
-  ClassRegisterer(const string& name, const string& filename, Creator creator)
+  typedef boost::function<CreateType*()> Creator;
+  ClassRegisterer(const string& name, const string& filename, Creator* creator)
       : Registerer<Creator>(name, filename, creator) {
   }
 
+  typedef CreateType* (*CreatorFunctionPtr)();
+  ClassRegisterer(const string& name, const string& filename,
+                  CreatorFunctionPtr creator)
+      : Registerer<Creator>(name, filename, new Creator(creator)) {
+  }
+
   static CreateType* CreateByName(const string& name) {
-    Creator creator = Registerer<Creator>::GetByName(name);
+    Creator* creator = Registerer<Creator>::GetByName(name);
     return (*creator)();
   }
 
@@ -123,8 +137,11 @@ class ClassRegisterer : public Registerer<base* (*)()> {
   class ClassName##Registerer										                    \
       : public ClassRegisterer<ClassName> {							            \
    public:															                            \
+    ClassName##Registerer(const string& name, const string& file,   \
+                             CreatorFunctionPtr creator)            \
+        : ClassRegisterer(name, file, creator) {}                   \
     ClassName##Registerer(const string& name, const string& file,	  \
-                          Creator creator)							            \
+                          Creator* creator)							            \
         : ClassRegisterer(name, file, creator) {}					          \
   };                                                                \
   typedef ClassName##Registerer::Creator ClassName##Creator
