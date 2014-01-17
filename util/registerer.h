@@ -6,12 +6,17 @@
 #include <utility>
 #include <vector>
 
-#include <boost/thread/thread.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/thread/thread.hpp>
+
 #include "base/macros.h"
-using namespace std;
+
+using std::map;
+using std::pair;
+using std::string;
+using std::vector;
 
 // T is a boost::function pointer.
 template<class T>
