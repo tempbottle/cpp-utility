@@ -24,3 +24,12 @@ some useful tool for cpp
   	};
   	REGISTER_BUILDER(TermBuilder);
   	
+##C++ singleton pattern
+`util/singleton.h`
+	
+	// get the singleton instance directly.
+	Singleton<Type>::Get();
+	// get const reference directly.
+	Singleton<Type>::GetReg();
+	// thread unsafe reset
+	Singleton<Type>::UnsafeReset();
