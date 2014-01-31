@@ -1,17 +1,10 @@
-//============================================================================
-// Name        : cpp-utility-tool.cpp
-// Author      : ronaflx
-// Version     :
-// Copyright   : 
-// Description : Hello World in C++, Ansi-style
-//============================================================================
-
 #include <iostream>
 #include <cassert>
 #include "base/macros.h"
 #include "base/sysinfo.h"
 #include "base/timer.h"
 #include "util/registerer.h"
+#include "strings/string_piece.h"
 #include "util/singleton.h"
 
 using namespace std;
@@ -57,16 +50,37 @@ void TestSingleton() {
   }
 }
 
+void TestStringPiece() {
+  static const char* ktest_string = "StringPiece Test String";
+  {
+    StringPiece string_piece;
+    assert(string_piece.data() == nullptr);
+    assert(string_piece.length() == 0u);
+  }
+  {
+    StringPiece string_piece(ktest_string);
+    assert(string_piece.length() == strlen(ktest_string));
+    printf("%s\n", string_piece.ToString().c_str());
+    string_piece.remove_prefix(5);
+    assert(string_piece.length() == strlen(ktest_string) - 5);
+    printf("%s\n", string_piece.ToString().data());
+    string_piece.remove_suffix(5);
+    assert(string_piece.length() == strlen(ktest_string) - 10);
+    printf("%s\n", string_piece.ToString().data());
+  }
+}
+
 int main() {
   TestRegister();
   TestSingleton();
+  TestStringPiece();
   printf("%d\n", NumCPUs());
   printf("%lf\n", NominalCPUFrequency());
   printf("%lf\n", CycleClockFrequency());
   WallTimer wall_timer;
   wall_timer.Start();
   char text_buf[1024];
-  while(gets(text_buf)) {
+  while (gets(text_buf)) {
     printf("%s %lf %lld\n", text_buf, wall_timer.Get(), wall_timer.GetInMs());
   }
   return 0;
