@@ -14,8 +14,8 @@
 // CRLF = CR LF ;
 // TEXTDATA =  %x20-21 / %x23-2B / %x2D-7E
 
-#ifndef PARSER_H_
-#define PARSER_H_
+#ifndef UTIL_CSV_PARSER_H_
+#define UTIL_CSV_PARSER_H_
 #include <vector>
 #include <string>
 #include "base/integral_types.h"
@@ -102,4 +102,4 @@ class Parser {
 
 } /* namespace csv */
 
-#endif /* PARSER_H_ */
+#endif /* UTIL_CSV_PARSER_H_ */
