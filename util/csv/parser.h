@@ -25,7 +25,9 @@ namespace csv {
 
 class Record {
  public:
-  const std::vector<std::string>& fields() const;
+  const std::vector<std::string>& fields() const {
+    return fields_;
+  }
   int64 number() const {
     return number_;
   }

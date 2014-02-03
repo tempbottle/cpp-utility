@@ -33,6 +33,7 @@ Parser::Parser(const StringPiece& source)
       record_count_(0),
       begin_iter_(this, source.empty()),
       end_iter_(this, true) {
+  Advance();
 }
 
 Parser::Parser(const StringPiece& source, char delim)
@@ -43,6 +44,7 @@ Parser::Parser(const StringPiece& source, char delim)
       record_count_(0),
       begin_iter_(this, source.empty()),
       end_iter_(this, true) {
+  Advance();
 }
 
 void Parser::Advance() {
@@ -55,19 +57,22 @@ void Parser::Advance() {
       if (!field.empty() || !record_.fields_.empty()) {
         record_.fields_.push_back(field);
       }
+      if (!record_.fields_.empty()) {
+        return;
+      }
       has_more_data_ = false;
+      return;
     }
 
     char next_char = source_[0];
     source_.remove_prefix(1);
-    // treat "\r\n" as "\n"
+    // treat "\r\n", "\r" and "\n" as same, newline
     if (next_char == '\r') {
       if (source_.empty()) {
-        next_char = '\n';
       } else if (source_[0] == '\n') {
         source_.remove_prefix(1);
-        next_char = '\n';
       }
+      next_char = '\n';
     }
     switch (state) {
       case FIELD_START:
