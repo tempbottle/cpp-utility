@@ -142,6 +142,50 @@ class StringPieceDetail {
 };
 
 template<typename T>
+inline bool operator ==(const StringPieceDetail<T>& x,
+                        const StringPieceDetail<T>& y) {
+  typedef typename StringPieceDetail<T>::size_type size_type;
+  size_type x_length = x.size();
+  size_type y_length = y.size();
+  return x_length == y_length && !memcmp(x.data(), y.data(), x_length);
+}
+
+template<typename T>
+inline bool operator !=(const StringPieceDetail<T>& x,
+                        const StringPieceDetail<T>& y) {
+  return !(x == y);
+}
+
+template<typename T>
+inline bool operator <(const StringPieceDetail<T>& x,
+                       const StringPieceDetail<T>& y) {
+  typedef typename StringPieceDetail<T>::size_type size_type;
+  size_type x_length = x.size();
+  size_type y_length = y.size();
+  size_type length = std::min(x_length, y_length);
+  const int r = memcmp(x.data(), y.data(), length);
+  return r < 0 || (r == 0 && x_length < y_length);
+}
+
+template<typename T>
+inline bool operator >(const StringPieceDetail<T>& x,
+                       const StringPieceDetail<T>& y) {
+  return y < x;
+}
+
+template<typename T>
+inline bool operator <=(const StringPieceDetail<T>& x,
+                        const StringPieceDetail<T>& y) {
+  return !(y < x);
+}
+
+template<typename T>
+inline bool operator >=(const StringPieceDetail<T>& x,
+                        const StringPieceDetail<T>& y) {
+  return !(x < y);
+}
+
+template<typename T>
 const typename StringPieceDetail<T>::size_type StringPieceDetail<T>::npos = -1;
 
 typedef StringPieceDetail<char> StringPiece;
