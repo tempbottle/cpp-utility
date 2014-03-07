@@ -27,7 +27,7 @@ class StringPieceDetail {
         length_(0) {
   }
 
-  explicit StringPieceDetail(const T* str)
+  StringPieceDetail(const T* str)
       : ptr_(str),
         length_(strlen(str)) {
   }
