@@ -8,6 +8,7 @@
 #include "base/sysinfo.h"
 #include "base/timer.h"
 #include "strings/string_piece.h"
+#include "strings/stringprintf.h"
 #include "util/csv/parser.h"
 #include "util/csv/writer.h"
 #include "util/singleton.h"
@@ -201,7 +202,18 @@ void TestCSVWriter() {
   }
 }
 
+void TestStringPrintf() {
+  string output = StringPrintf("%d %d", 1, 2);
+  assert(output == "1 2");
+  StringPrintf(&output, "%d %d", 3, 4);
+  assert(output == "3 4");
+  StringPrintfAppend(&output, " %d %d", 1, 2);
+  cout << output << endl;
+  assert(output == "3 4 1 2");
+}
+
 int main() {
+  TestStringPrintf();
   TestRegister();
   TestSingleton();
   TestStringPiece();
