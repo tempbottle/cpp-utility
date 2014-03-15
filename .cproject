@@ -23,6 +23,7 @@
 							<tool command="g++" id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug.1346672719" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug">
 								<option id="macosx.cpp.link.option.libs.1776770894" name="Libraries (-l)" superClass="macosx.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
+									<listOptionValue builtIn="false" value="gtest"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 								</option>
 								<option id="macosx.cpp.link.option.other.1348055148" name="Other options (-Xlinker [option])" superClass="macosx.cpp.link.option.other"/>
@@ -86,6 +87,7 @@
 							<tool command="g++" id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug.1242907994" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug">
 								<option id="macosx.cpp.link.option.libs.1060189510" name="Libraries (-l)" superClass="macosx.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
+									<listOptionValue builtIn="false" value="gtest"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 								</option>
 								<option id="macosx.cpp.link.option.other.378167303" name="Other options (-Xlinker [option])" superClass="macosx.cpp.link.option.other"/>
