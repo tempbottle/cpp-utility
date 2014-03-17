@@ -5,9 +5,10 @@
 
 #ifndef UTIL_EXISTENCE_FILTER_H_
 #define UTIL_EXISTENCE_FILTER_H_
+#include <boost/scoped_ptr.hpp>
 
 #include <cstddef>
-#include <boost/scoped_ptr.hpp>
+
 #include "base/integral_types.h"
 
 class ExistenceFilter {
@@ -30,7 +31,6 @@ class ExistenceFilter {
   ~ExistenceFilter();
 
   void Clear();
-
   // Inserts a hash value into the filter
   // We generate 'k' separate internal hash values
   void Insert(uint64 hash);
@@ -79,4 +79,4 @@ class ExistenceFilter {
   const int32 num_hashes_;  // number of hashes per lookup
 };
 
-#endif /* EXISTENCE_FILTER_H_ */
+#endif  // UTIL_EXISTENCE_FILTER_H_

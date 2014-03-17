@@ -1,8 +1,9 @@
-#ifndef STRINGS_STRINGPIECE_H_
-#define STRINGS_STRINGPIECE_H_
+#ifndef STRINGS_STRING_PIECE_H_
+#define STRINGS_STRING_PIECE_H_
+
+#include <stddef.h>
 
 #include <algorithm>
-#include <stddef.h>
 #include <string>
 #include <iterator>
 #include <memory>
@@ -27,7 +28,7 @@ class StringPieceDetail {
         length_(0) {
   }
 
-  StringPieceDetail(const T* str)
+  explicit StringPieceDetail(const T* str)
       : ptr_(str),
         length_(strlen(str)) {
   }
@@ -40,13 +41,11 @@ class StringPieceDetail {
   StringPieceDetail(StringPieceDetail x, size_type pos)
       : ptr_(x.ptr_ + pos),
         length_(x.length_ - pos) {
-
   }
 
   StringPieceDetail(StringPieceDetail x, size_type pos, size_type len)
       : ptr_(x.ptr_ + pos),
         length_(std::min(len, x.length_ - pos)) {
-
   }
 
   template<class Allocator>
@@ -136,6 +135,7 @@ class StringPieceDetail {
   const_reverse_iterator rend() const {
     return const_reverse_iterator(ptr_);
   }
+
  private:
   const T* ptr_;
   size_type length_;
@@ -190,4 +190,4 @@ const typename StringPieceDetail<T>::size_type StringPieceDetail<T>::npos = -1;
 
 typedef StringPieceDetail<char> StringPiece;
 typedef StringPieceDetail<wchar_t> WStringPiece;
-#endif /* STRINGS_STRINGPIECE_H_ */
+#endif  // STRINGS_STRING_PIECE_H_

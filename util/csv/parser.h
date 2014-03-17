@@ -86,8 +86,9 @@ class Parser {
     return end_iter_;
   }
 
-  Parser(const StringPiece& source);
+  explicit Parser(const StringPiece& source);
   Parser(const StringPiece& source, char delim);
+
  private:
   void Advance();
 
@@ -104,4 +105,4 @@ class Parser {
 
 } /* namespace csv */
 
-#endif /* UTIL_CSV_PARSER_H_ */
+#endif  // UTIL_CSV_PARSER_H_

@@ -1,15 +1,16 @@
 #ifndef UTIL_REGISTERER_H_
 #define UTIL_REGISTERER_H_
 
-#include <map>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/thread/once.hpp>
 #include <boost/thread/thread.hpp>
+
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "base/macros.h"
 
@@ -30,7 +31,7 @@ class Registerer {
     pair<typename ObjectMap::iterator, bool> p = objects_->insert(
         make_pair(name, ObjectFilePair(object, filename)));
     if (!p.second) {
-      ;
+      // report error here.
     }
   }
 
@@ -138,16 +139,16 @@ class ClassRegisterer : public Registerer<boost::function<base* ()>> {
   DISALLOW_COPY_AND_ASSIGN(ClassRegisterer);
 };
 
-#define DEFINE_REGISTERER(ClassName)							                  \
-  class ClassName##Registerer										                    \
-      : public ClassRegisterer<ClassName> {							            \
-   public:															                            \
+#define DEFINE_REGISTERER(ClassName)                                \
+  class ClassName##Registerer                                       \
+    : public ClassRegisterer<ClassName> {                           \
+  public:                                                          \
     ClassName##Registerer(const string& name, const string& file,   \
                              CreatorFunctionPtr creator)            \
         : ClassRegisterer(name, file, creator) {}                   \
-    ClassName##Registerer(const string& name, const string& file,	  \
-                          Creator* creator)							            \
-        : ClassRegisterer(name, file, creator) {}					          \
+    ClassName##Registerer(const string& name, const string& file,   \
+                          Creator* creator)                         \
+        : ClassRegisterer(name, file, creator) {}                   \
   };                                                                \
   typedef ClassName##Registerer::Creator ClassName##Creator
 

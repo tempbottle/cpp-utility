@@ -24,7 +24,7 @@ class Singleton {
     module_init_ = BOOST_ONCE_INIT;
   }
 
- public:
+ private:
   static void InitSingleton() {
     instance_ = ::new Type();
   }

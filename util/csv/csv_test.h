@@ -1,8 +1,10 @@
-#ifndef CSV_TEST_H_
-#define CSV_TEST_H_
+#ifndef UTIL_CSV_CSV_TEST_H_
+#define UTIL_CSV_CSV_TEST_H_
 
 #include <gtest/gtest.h>
+
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "strings/string_piece.h"
@@ -150,9 +152,12 @@ TEST(CSVTester, MissingNewline) {
 TEST(CSVTester, QuotedNewline) {
   StringPiece string_piece(kQuotedNewlineContent);
   csv::Parser parser(string_piece);
-  std::vector<std::vector<std::string>> expected { { "There", "is", "a",
-      "newline", "here" }, { "There,is\na", "newline", "here" }, {
-      "There,is\na", "newline", "here" }, { "There,is\na", "newline", "here" } };
+  std::vector<std::vector<std::string>> expected {
+    { "There", "is", "a", "newline", "here" },
+    { "There,is\na", "newline", "here" },
+    { "There,is\na", "newline", "here" },
+    { "There,is\na", "newline", "here" } };
+
   std::vector<std::vector<std::string>> actual;
   for (const auto record : parser) {
     actual.push_back(record.fields());
@@ -172,4 +177,4 @@ TEST(CSVTester, Misc) {
   EXPECT_EQ(actual, expected);
 }
 
-#endif /* CSV_TEST_H_ */
+#endif  // UTIL_CSV_CSV_TEST_H_

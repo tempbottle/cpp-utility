@@ -1,5 +1,5 @@
-#ifndef STRING_PIECE_TEST_H_
-#define STRING_PIECE_TEST_H_
+#ifndef STRINGS_STRING_PIECE_TEST_H_
+#define STRINGS_STRING_PIECE_TEST_H_
 
 #include <gtest/gtest.h>
 #include "strings/string_piece.h"
@@ -46,4 +46,4 @@ TEST(TestStringPiece, OperatorTest) {
   }
 }
 
-#endif /* STRING_PIECE_TEST_H_ */
+#endif  // STRINGS_STRING_PIECE_TEST_H_

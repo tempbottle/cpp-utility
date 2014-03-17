@@ -1,5 +1,7 @@
 #include "util/csv/parser.h"
 
+#include <string>
+
 namespace csv {
 namespace {
 // add a param delim to support tsv files.

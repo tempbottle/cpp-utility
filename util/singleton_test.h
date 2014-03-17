@@ -1,5 +1,5 @@
-#ifndef SINGLETON_TEST_H_
-#define SINGLETON_TEST_H_
+#ifndef UTIL_SINGLETON_TEST_H_
+#define UTIL_SINGLETON_TEST_H_
 
 #include <gtest/gtest.h>
 
@@ -17,4 +17,4 @@ TEST(TestSingleton, TestRef) {
   EXPECT_EQ(ptr0, &ref);
 }
 
-#endif /* SINGLETON_TEST_H_ */
+#endif  // UTIL_SINGLETON_TEST_H_

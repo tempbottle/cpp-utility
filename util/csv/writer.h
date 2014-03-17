@@ -1,17 +1,15 @@
-#ifndef WRITER_H_
-#define WRITER_H_
+#ifndef UTIL_CSV_WRITER_H_
+#define UTIL_CSV_WRITER_H_
 #include <vector>
 #include <string>
 #include <iostream>
 
 #include "base/macros.h"
 namespace csv {
-namespace {
 // add a param delim to support tsv files.
 inline bool IsTextArea(char next_char, char delim) {
   return ((0x20 <= next_char && next_char <= 0x21)
       || (0x23 <= next_char && next_char <= 0x7E)) && next_char != delim;
-}
 }
 template<typename P>
 bool GetField(const P& element, char delim, std::ostream* out) {
@@ -77,6 +75,7 @@ class Writer {
     (*out_) << '\n';
     return true;
   }
+
  private:
   const Container* container_;
   char delim_;
@@ -86,4 +85,4 @@ class Writer {
 };
 } /* namespace csv */
 
-#endif /* WRITER_H_ */
+#endif  // UTIL_CSV_WRITER_H_

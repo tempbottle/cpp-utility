@@ -1,10 +1,10 @@
-#ifndef REGISTERER_TEST_H_
-#define REGISTERER_TEST_H_
+#ifndef UTIL_REGISTERER_TEST_H_
+#define UTIL_REGISTERER_TEST_H_
 
+#include "util/registerer.h"
+#include <gtest/gtest.h>
 #include <string>
 #include <memory>
-#include <gtest/gtest.h>
-#include "util/registerer.h"
 
 class Builder {
  public:
@@ -32,12 +32,12 @@ class WordBuilder : public Builder {
 REGISTER_BUILDER(WordBuilder);
 
 TEST(TestRegister, VirtualFunctionTest) {
-  std::unique_ptr<Builder> term_builder(BuilderRegisterer::CreateByName(
-      "TermBuilder"));
-  std::unique_ptr<Builder> word_builder(BuilderRegisterer::CreateByName(
-      "WordBuilder"));
+  std::unique_ptr<Builder> term_builder(
+      BuilderRegisterer::CreateByName("TermBuilder"));
+  std::unique_ptr<Builder> word_builder(
+      BuilderRegisterer::CreateByName("WordBuilder"));
   EXPECT_EQ(term_builder->Build("some builder"), "TermBuilder");
   EXPECT_EQ(word_builder->Build("some builder"), "WordBuilder");
 }
 
-#endif /* REGISTERER_TEST_H_ */
+#endif  // UTIL_REGISTERER_TEST_H_

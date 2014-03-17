@@ -1,9 +1,11 @@
 #include "util/existence_filter.h"
-#include "base/macros.h"
 
 #include <boost/scoped_ptr.hpp>
+
 #include <cstring>
 #include <cmath>
+
+#include "base/macros.h"
 
 class ExistenceFilter::BlockBitmap {
  public:
@@ -30,15 +32,15 @@ class ExistenceFilter::BlockBitmap {
   const uint32 num_blocks_;
   const uint32 bytes_in_last_;
 
-  DISALLOW_COPY_AND_ASSIGN (BlockBitmap);
-
   uint32 NumBlock(uint32 length) {
     return (length >> kBlockShift) + ((length & kBlockMask) != 0);
   }
   uint32 NumBytesInLastBlock(uint32 length) {
     int remind = length & kBlockMask;
-    return remind == 0 ? kBlockBytes : (remind + 31) / 32 * sizeof(uint32);
+    return remind == 0 ? kBlockBytes : (remind + 31) / 32 * sizeof(**block_);
   }
+
+  DISALLOW_COPY_AND_ASSIGN(BlockBitmap);
 };
 
 ExistenceFilter::BlockBitmap::BlockBitmap(uint32 length)
@@ -49,7 +51,7 @@ ExistenceFilter::BlockBitmap::BlockBitmap(uint32 length)
   for (int i = 0; i < num_blocks_ - 1; i++) {
     block_[i] = new uint32[kBlockWords];
   }
-  block_[num_blocks_ - 1] = new uint32[bytes_in_last_ / sizeof(uint32)];
+  block_[num_blocks_ - 1] = new uint32[bytes_in_last_ / sizeof(**block_)];
 }
 
 ExistenceFilter::BlockBitmap::~BlockBitmap() {
@@ -121,7 +123,8 @@ ExistenceFilter* ExistenceFilter::CreateOptimal(size_t size_in_bytes,
   const uint32 m = size_in_bytes * 8;
   const uint32 n = estimated_insertions;
 
-  int optimal_k = static_cast<int>((static_cast<float>(m) / n * log(2.0)) + 0.5);
+  int optimal_k = static_cast<int>(
+      (static_cast<float>(m) / n * log(2.0)) + 0.5);
   if (optimal_k < 1) {
     optimal_k = 1;
   }
@@ -135,7 +138,6 @@ ExistenceFilter::~ExistenceFilter() {
 }
 
 void ExistenceFilter::Clear() {
-
 }
 
 bool ExistenceFilter::Exists(uint64 hash) const {
@@ -156,8 +158,9 @@ void ExistenceFilter::Insert(uint64 hash) {
 }
 
 size_t ExistenceFilter::Size() const {
-  return BitsToWords(vec_size_) * sizeof(uint32);
+  return BitsToWords(vec_size_) * sizeof(vec_size_);
 }
+
 size_t ExistenceFilter::MinFilterSizeInBytesForErrorRate(float error_rate,
                                                          size_t num_elements) {
   // (-num_hashes * num_elements) / log(1 - error_rate^(1/num_hashes))
@@ -224,7 +227,7 @@ ExistenceFilter* ExistenceFilter::Read(const char* buf, size_t size) {
   ReadHeader(buf, &header);
   buf += sizeof(Header);
   const uint32 filter_size = BitsToWords(header.m);
-  const uint32 filter_bytes = filter_size * sizeof(uint32);
+  const uint32 filter_bytes = filter_size * sizeof(filter_size);
   if (size < sizeof(Header) + filter_bytes) {
     return NULL;
   }
