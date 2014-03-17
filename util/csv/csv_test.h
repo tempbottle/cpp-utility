@@ -152,11 +152,9 @@ TEST(CSVTester, MissingNewline) {
 TEST(CSVTester, QuotedNewline) {
   StringPiece string_piece(kQuotedNewlineContent);
   csv::Parser parser(string_piece);
-  std::vector<std::vector<std::string>> expected {
-    { "There", "is", "a", "newline", "here" },
-    { "There,is\na", "newline", "here" },
-    { "There,is\na", "newline", "here" },
-    { "There,is\na", "newline", "here" } };
+  std::vector<std::vector<std::string>> expected { { "There", "is", "a",
+      "newline", "here" }, { "There,is\na", "newline", "here" }, {
+      "There,is\na", "newline", "here" }, { "There,is\na", "newline", "here" } };
 
   std::vector<std::vector<std::string>> actual;
   for (const auto record : parser) {
