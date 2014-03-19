@@ -58,6 +58,17 @@ class OrderBy {
   Compare compare_;
 };
 
+// Using default value is OK, but I prefer to use a different function
+template<class Functor, class Compare>
+inline OrderBy<Functor, Compare> MakeOrderBy(Functor functor, Compare compare) {
+  return OrderBy<Functor, Compare>(functor, compare);
+}
+
+template<class Functor>
+inline OrderBy<Functor> MakeOrderBy(Functor functor) {
+  return OrderBy<Functor>(functor);
+}
+
 template<class ... C>
 class ChainComparators {
  public:
@@ -67,20 +78,36 @@ class ChainComparators {
 
   template<class T>
   bool operator()(const T& a, const T& b) const {
+    return CompareWith(a, b, Tag<0>());
+  }
+ private:
+  template<size_t I> struct Tag {
+  };
+
+  template<typename T>
+  bool CompareWith(const T& x, const T& y, Tag<sizeof...(C)>) const {
     return false;
   }
-
-  template<class T>
-  bool CompareWith(const T&a, const T& b, int tag) const {
-    if (tag == sizeof...(C)) {
-      return false;
-    }
-    if (std::get<tag>(c_)(a, b)) return true;
-    if (std::get<tag>(c_)(b, a)) return false;
-    return CompareWith(a, b, tag + 1);
+  template <typename T, size_t I>
+  bool CompareWith(const T& x, const T& y, Tag<I>) const {
+    if (std::get<I>(c_)(x, y)) return true;
+    if (std::get<I>(c_)(y, x)) return false;
+    return CompareWith(x, y, Tag<I + 1>());
   }
+  // We can not use something like:
+  // CompareWith(const T& x, const T& y, int tag) const;
+  // std::get<I>'s template param `I` must be determined in compiling time.
+  // We can not use something like:
+  // CompareWith(const T& x, const T& y, Tag<int> const {
+  //   if (I = sizeof ...(C))
+  // syntax error.
+
 private:
   std::tuple<C...> c_;
 };
 
+template<class ...C>
+inline ChainComparators<C...> MakeChainComparators(const C& ... c) {
+  return ChainComparators<C...>(c ...);
+}
 #endif  // UTIL_COMPARATOR_H_
