@@ -1,5 +1,10 @@
+// Copyright 2014 ronaflx
 #ifndef BASE_CYCLECLOCK_H_
 #define BASE_CYCLECLOCK_H_
+
+#ifdef OS_MACOSX
+#include <mach/mach_time.h>
+#endif
 
 #include "base/integral_types.h"
 #include "base/sysinfo.h"
@@ -13,8 +18,7 @@ class CycleClock {
   CycleClock();  // no instances
 };
 
-#if defined(OS_MACOSX)
-#include <mach/mach_time.h>
+#ifdef OS_MACOSX
 inline int64 CycleClock::Now() {
   return mach_absolute_time();
 }

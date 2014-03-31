@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #include <gtest/gtest.h>
 
 #include "strings/string_piece_test.h"

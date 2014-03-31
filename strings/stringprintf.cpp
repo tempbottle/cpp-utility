@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #include <string>
 #include <cstdarg>
 

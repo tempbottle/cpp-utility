@@ -1,11 +1,13 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_COMPARATOR_TEST_H_
 #define UTIL_COMPARATOR_TEST_H_
+#include "util/comparator.h"
+
+#include <gtest/gtest.h>
 #include <algorithm>
 #include <vector>
 #include <utility>
-#include <gtest/gtest.h>
-
-#include "util/comparator.h"
+#include <functional>
 
 TEST(ComparatorUtilTest, FieldFunctorTest) {
   typedef pair<int, int> pairII;
@@ -102,11 +104,5 @@ TEST(ComparatorUitlTest, ChainComparatorTest) {
                            MakeOrderBy(PairField(&PairII::second))));
   Verify(pairs, PairField(&PairII::first), PairField(&PairII::first), N);
   Verify(pairs, PairField(&PairII::second), PairField(&PairII::second), N);
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N; j++) {
-      printf("%d%d%c", pairs[i * N + j].first, pairs[i * N + j].second,
-             j == N - 1 ? '\n' : ' ');
-    }
-  }
 }
-#endif /* UTIL_COMPARATOR_TEST_H_ */
+#endif  // UTIL_COMPARATOR_TEST_H_

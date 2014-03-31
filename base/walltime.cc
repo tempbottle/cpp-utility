@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #include "base/walltime.h"
 
 #include "base/cycleclock.h"

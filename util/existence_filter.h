@@ -1,8 +1,8 @@
+// Copyright 2014 ronaflx
 /*
  * existence_filter.h
  * mainly copy from chromium storage/existence_filter.h
  */
-
 #ifndef UTIL_EXISTENCE_FILTER_H_
 #define UTIL_EXISTENCE_FILTER_H_
 #include <boost/scoped_ptr.hpp>

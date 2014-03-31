@@ -1,7 +1,9 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_COMPARATOR_H_
 #define UTIL_COMPARATOR_H_
-#include <functional>
+
 #include <tuple>
+#include <functional>
 
 // Functor to a field of class
 template<class C, class T>
@@ -38,14 +40,14 @@ class Getter {
   T (C::*member_ptr_)() const;
 };
 
-template<class Functor, class Compare = std::less<typename Functor::type_value> >
+template<class Functor, class Compare = std::less<typename Functor::type_value>>
 class OrderBy {
  public:
   OrderBy(Functor functor, Compare compare)
       : functor_(functor),
         compare_(compare) {
   }
-  OrderBy(Functor functor)
+  explicit OrderBy(Functor functor)
       : functor_(functor),
         compare_() {
   }
@@ -53,6 +55,7 @@ class OrderBy {
   bool operator()(const T& a, const T& b) const {
     return compare_(functor_(a), functor_(b));
   }
+
  private:
   Functor functor_;
   Compare compare_;
@@ -80,6 +83,7 @@ class ChainComparators {
   bool operator()(const T& a, const T& b) const {
     return CompareWith(a, b, Tag<0>());
   }
+
  private:
   template<size_t I> struct Tag {
   };
@@ -101,8 +105,6 @@ class ChainComparators {
   // CompareWith(const T& x, const T& y, Tag<int> const {
   //   if (I = sizeof ...(C))
   // syntax error.
-
-private:
   std::tuple<C...> c_;
 };
 

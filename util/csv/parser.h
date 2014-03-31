@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 // csv parser based on RFC4180
 // The ABNF grammar of csv
 // file = [header CRLF] record *(CRLF record) [CRLF]

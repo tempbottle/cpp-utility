@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef BASE_WALLTIME_H_
 #define BASE_WALLTIME_H_
 
@@ -10,4 +11,4 @@ extern int64 WallTime_CPS();
 extern double WallTime_SPC();
 extern int WallTime_Recalibrations();
 
-#endif  // WALLTIME_H_
+#endif  // BASE_WALLTIME_H_

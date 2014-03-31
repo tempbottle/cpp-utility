@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 // system info for mac for now.
 
 #ifndef BASE_SYSINFO_H_

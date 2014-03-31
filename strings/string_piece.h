@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef STRINGS_STRING_PIECE_H_
 #define STRINGS_STRING_PIECE_H_
 

@@ -1,5 +1,10 @@
+// Copyright 2014 ronaflx
 #include "base/sysinfo.h"
 
+#if defined OS_MACOSX
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#endif
 #include <sys/sysctl.h>
 #include <unistd.h>
 
@@ -8,16 +13,12 @@
 #include <cstdio>
 #include "base/macros.h"
 #include "base/cycleclock.h"
-#if defined OS_MACOSX
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-#endif
 
 static boost::once_flag cpuinfo_init = BOOST_ONCE_INIT;
 
 static double cpuinfo_cycles_per_second = 1.0;
 static double cpuinfo_time_base_frequency = 1.0;
-static int    cpuinfo_num_cpus = 1;
+static int cpuinfo_num_cpus = 1;
 
 static void InitializeSystemInfo() {
 #if defined OS_MACOSX
@@ -35,7 +36,7 @@ static void InitializeSystemInfo() {
       == 0 && (size == sizeof(num_cpus)))
     cpuinfo_num_cpus = num_cpus;
 #else
-    // Generic cycles per second counter
+  // Generic cycles per second counter
 #endif
 }
 

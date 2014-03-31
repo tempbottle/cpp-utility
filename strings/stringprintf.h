@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef STRINGS_STRINGPRINTF_H_
 #define STRINGS_STRINGPRINTF_H_
 #include <string>

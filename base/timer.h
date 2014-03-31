@@ -1,3 +1,6 @@
+// Copyright 2014 ronaflx
+#ifndef BASE_TIMER_H_
+#define BASE_TIMER_H_
 #include <sys/time.h>
 
 #include "base/walltime.h"
@@ -144,3 +147,5 @@ inline int64 WallTimer::NowInMs() {
 inline int64 WallTimer::NowInUsec() {
   return static_cast<int64>(1000) * 1000 * WallTime_Now();
 }
+
+#endif  // BASE_TIMER_H_

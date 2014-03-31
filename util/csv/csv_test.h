@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_CSV_CSV_TEST_H_
 #define UTIL_CSV_CSV_TEST_H_
 
@@ -152,9 +153,12 @@ TEST(CSVTester, MissingNewline) {
 TEST(CSVTester, QuotedNewline) {
   StringPiece string_piece(kQuotedNewlineContent);
   csv::Parser parser(string_piece);
-  std::vector<std::vector<std::string>> expected { { "There", "is", "a",
-      "newline", "here" }, { "There,is\na", "newline", "here" }, {
-      "There,is\na", "newline", "here" }, { "There,is\na", "newline", "here" } };
+  std::vector<std::vector<std::string>> expected {
+    { "There", "is", "a", "newline", "here" },
+    { "There,is\na", "newline", "here" },
+    { "There,is\na", "newline", "here" },
+    { "There,is\na", "newline", "here" }
+  };
 
   std::vector<std::vector<std::string>> actual;
   for (const auto record : parser) {

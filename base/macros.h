@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef BASE_MACROS_H_
 #define BASE_MACROS_H_
 

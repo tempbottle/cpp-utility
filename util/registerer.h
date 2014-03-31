@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_REGISTERER_H_
 #define UTIL_REGISTERER_H_
 

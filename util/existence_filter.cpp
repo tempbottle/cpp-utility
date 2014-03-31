@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #include "util/existence_filter.h"
 
 #include <boost/scoped_ptr.hpp>

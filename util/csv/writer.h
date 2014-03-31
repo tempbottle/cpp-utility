@@ -1,8 +1,8 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_CSV_WRITER_H_
 #define UTIL_CSV_WRITER_H_
 #include <vector>
 #include <string>
-#include <iostream>
 
 #include "base/macros.h"
 namespace csv {

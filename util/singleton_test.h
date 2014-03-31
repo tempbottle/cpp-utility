@@ -1,3 +1,4 @@
+// Copyright 2014 ronaflx
 #ifndef UTIL_SINGLETON_TEST_H_
 #define UTIL_SINGLETON_TEST_H_
 
