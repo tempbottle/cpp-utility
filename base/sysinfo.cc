@@ -54,3 +54,27 @@ double CycleClockFrequency() {
   boost::call_once(cpuinfo_init, InitializeSystemInfo);
   return cpuinfo_time_base_frequency;
 }
+
+double GetCPUUsage() {
+  struct rusage ru;
+  if (getrusage(RUSAGE_SELF, &ru) == 0) {
+    return (static_cast<double>(ru.ru_utime.tv_sec)
+        + static_cast<double>(ru.ru_utime.tv_usec) * 1e-6
+        + static_cast<double>(ru.ru_stime.tv_sec)
+        + static_cast<double>(ru.ru_stime.tv_usec) * 1e-6);
+  } else {
+    return 0.0;
+  }
+}
+
+double GetChildrenCPUUsage() {
+  struct rusage ru;
+  if (getrusage(RUSAGE_CHILDREN, &ru) == 0) {
+    return (static_cast<double>(ru.ru_utime.tv_sec)
+        + static_cast<double>(ru.ru_utime.tv_usec) * 1e-6
+        + static_cast<double>(ru.ru_stime.tv_sec)
+        + static_cast<double>(ru.ru_stime.tv_usec) * 1e-6);
+  } else {
+    return 0.0;
+  }
+}
