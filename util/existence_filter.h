@@ -5,10 +5,9 @@
  */
 #ifndef UTIL_EXISTENCE_FILTER_H_
 #define UTIL_EXISTENCE_FILTER_H_
-#include <boost/scoped_ptr.hpp>
 
 #include <cstddef>
-
+#include <memory>
 #include "base/integral_types.h"
 
 class ExistenceFilter {
@@ -73,7 +72,7 @@ class ExistenceFilter {
     return words;
   }
 
-  boost::scoped_ptr<BlockBitmap> rep_;  // points to bitmap
+  std::unique_ptr<BlockBitmap> rep_;  // points to bitmap
   const uint32 vec_size_;  // size of bitmap (in bits)
   const uint32 expected_nelts_;  // expected number of inserts
   const int32 num_hashes_;  // number of hashes per lookup
