@@ -1,0 +1,3 @@
+// the configured options and settings for Tutorial
+#define CPP_UTILITY_VERSION_MAJOR @CPP_UTILITY_VERSION_MAJOR@
+#define CPP_UTILITY_VERSION_MINOR @CPP_UTILITY_VERSION_MINOR@

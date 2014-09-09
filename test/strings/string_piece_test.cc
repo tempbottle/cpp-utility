@@ -1,7 +1,4 @@
 // Copyright 2014 ronaflx
-#ifndef STRINGS_STRING_PIECE_TEST_H_
-#define STRINGS_STRING_PIECE_TEST_H_
-
 #include <gtest/gtest.h>
 #include "strings/string_piece.h"
 
@@ -47,4 +44,7 @@ TEST(TestStringPiece, OperatorTest) {
   }
 }
 
-#endif  // STRINGS_STRING_PIECE_TEST_H_
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

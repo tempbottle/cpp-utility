@@ -1,6 +1,4 @@
 // Copyright 2014 ronaflx
-#ifndef UTIL_COMPARATOR_TEST_H_
-#define UTIL_COMPARATOR_TEST_H_
 #include "util/comparator.h"
 
 #include <gtest/gtest.h>
@@ -8,6 +6,8 @@
 #include <vector>
 #include <utility>
 #include <functional>
+using std::pair;
+using std::vector;
 
 TEST(ComparatorUtilTest, FieldFunctorTest) {
   typedef pair<int, int> pairII;
@@ -105,4 +105,8 @@ TEST(ComparatorUitlTest, ChainComparatorTest) {
   Verify(pairs, PairField(&PairII::first), PairField(&PairII::first), N);
   Verify(pairs, PairField(&PairII::second), PairField(&PairII::second), N);
 }
-#endif  // UTIL_COMPARATOR_TEST_H_
+
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

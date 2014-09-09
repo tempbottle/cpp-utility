@@ -5,10 +5,10 @@
 #include <string>
 using std::string;
 
-extern string Strip(const string& val, const string& skip_value);
-extern string LeftStripChar(const string& val, const string& skip_value);
-extern string RightStripChar(const string& val, const string& skip_value);
-extern string StripWhiteSpace(const string& val);
-extern string StripSpaceAndTab(const string& val);
+string Strip(const string& val, const string& skip_value);
+string LeftStripChar(const string& val, const string& skip_value);
+string RightStripChar(const string& val, const string& skip_value);
+string StripWhiteSpace(const string& val);
+string StripSpaceAndTab(const string& val);
 
 #endif  // STRINGS_STRIP_H_

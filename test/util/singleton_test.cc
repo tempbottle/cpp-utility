@@ -1,7 +1,4 @@
 // Copyright 2014 ronaflx
-#ifndef UTIL_SINGLETON_TEST_H_
-#define UTIL_SINGLETON_TEST_H_
-
 #include <gtest/gtest.h>
 
 #include "util/singleton.h"
@@ -18,4 +15,7 @@ TEST(TestSingleton, TestRef) {
   EXPECT_EQ(ptr0, &ref);
 }
 
-#endif  // UTIL_SINGLETON_TEST_H_
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

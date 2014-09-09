@@ -1,7 +1,4 @@
 // Copyright 2014 ronaflx
-#ifndef UTIL_CSV_CSV_TEST_H_
-#define UTIL_CSV_CSV_TEST_H_
-
 #include <gtest/gtest.h>
 
 #include <sstream>
@@ -179,4 +176,7 @@ TEST(CSVTester, Misc) {
   EXPECT_EQ(actual, expected);
 }
 
-#endif  // UTIL_CSV_CSV_TEST_H_
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

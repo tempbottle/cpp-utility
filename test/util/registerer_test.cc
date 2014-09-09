@@ -1,7 +1,4 @@
 // Copyright 2014 ronaflx
-#ifndef UTIL_REGISTERER_TEST_H_
-#define UTIL_REGISTERER_TEST_H_
-
 #include "util/registerer.h"
 #include <gtest/gtest.h>
 #include <string>
@@ -41,4 +38,7 @@ TEST(TestRegister, VirtualFunctionTest) {
   EXPECT_EQ(word_builder->Build("some builder"), "WordBuilder");
 }
 
-#endif  // UTIL_REGISTERER_TEST_H_
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
