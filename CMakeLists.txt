@@ -27,5 +27,5 @@ if (test)
   add_subdirectory(test)
 endif()
 
-add_executable(cpp-utility cpp-utility.cpp)
+add_executable(cpp-utility cpp-utility.cc)
 target_link_libraries(cpp-utility gtest)
