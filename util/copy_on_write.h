@@ -15,9 +15,9 @@ class CopyOnWrite {
   ~CopyOnWrite();
 
   CopyOnWrite& operator=(const CopyOnWrite& other);
-  const T& get();
   T* get_mutable();
-  int get_ref();
+  const T& get() const;
+  int get_ref() const;
 
  private:
   struct Rep {
@@ -59,7 +59,7 @@ CopyOnWrite<T>& CopyOnWrite<T>::operator=(const CopyOnWrite& other) {
 }
 
 template <typename T>
-const T& CopyOnWrite<T>::get() {
+const T& CopyOnWrite<T>::get() const {
   return rep_->value;
 }
 
@@ -76,7 +76,7 @@ T* CopyOnWrite<T>::get_mutable() {
 }
 
 template <typename T>
-int CopyOnWrite<T>::get_ref() {
+int CopyOnWrite<T>::get_ref() const {
   return rep_->ref.load();
 }
 
