@@ -17,7 +17,11 @@ target_link_libraries(comparator_test gtest)
 add_executable(copy_on_write_test copy_on_write_test.cc)
 target_link_libraries(copy_on_write_test gtest)
 
+add_executable(statistics_test statistics_test.cc)
+target_link_libraries(statistics_test gtest)
+
 add_test(registerer_test registerer_test)
 add_test(singleton_test singleton_test)
 add_test(comparator_test comparator_test)
 add_test(copy_on_write_test copy_on_write_test)
+add_test(statistics_test statistics_test)
