@@ -25,17 +25,17 @@ class StringPiece {
 
   StringPiece() : ptr_(nullptr), length_(0) {}
 
-  explicit StringPiece(const char* str) : ptr_(str), length_(strlen(str)) {}
+  StringPiece(const char* str) : ptr_(str), length_(strlen(str)) {}  // NOLINT
 
   StringPiece(const char* str, size_type size) : ptr_(str), length_(size) {}
 
-  StringPiece(StringPiece x, size_type pos)
+  StringPiece(StringPiece x, size_type pos)  // NOLINT
       : ptr_(x.ptr_ + pos), length_(x.length_ - pos) {}
 
   StringPiece(StringPiece x, size_type pos, size_type len)
       : ptr_(x.ptr_ + pos), length_(std::min(len, x.length_ - pos)) {}
 
-  explicit StringPiece(const std::string& str)
+  StringPiece(const std::string& str)
       : ptr_(str.c_str()), length_(str.size()) {}
 
   const char* data() const { return ptr_; }

@@ -3,7 +3,6 @@
 #include <gmock/gmock.h>
 
 #include "strings/split.h"
-#include "strings/string_piece.h"
 
 TEST(StringSplit, SplitByCharacterNormal) {
   std::string const test_string = "a b c";
