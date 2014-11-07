@@ -3,9 +3,7 @@
 
 #include <sstream>
 #include <string>
-#include <vector>
 
-#include "strings/string_piece.h"
 #include "strings/stringprintf.h"
 #include "util/csv/parser.h"
 #include "util/csv/writer.h"
@@ -74,9 +72,6 @@ const char kMisc[] = ",,,,,\n"
     "\n"
     "\n"
     "asdfsd\"asdfasdf";
-
-void TestCSVParserDetail(const StringPiece& string_piece, char delim = ',') {
-}
 
 TEST(CSVTester, CSVParser) {
   {
