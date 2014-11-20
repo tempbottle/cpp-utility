@@ -4,6 +4,9 @@ project (cpp-utility)
 # Cmake option
 option(test "test" ON)
 
+# Export compile command for libclang
+set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 # The version number.
 set (CPP_UTILITY_VERSION_MAJOR 1)
 set (CPP_UTILITY_VERSION_MINOR 0)
