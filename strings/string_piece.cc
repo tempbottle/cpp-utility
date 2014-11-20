@@ -2,7 +2,23 @@
 #include <strings/string_piece.h>
 #include <ostream>  // NOLINT
 
-// utility function to be added.
+std::string StringPiece::substr(size_type pos, size_type n) const {
+  pos = std::min(pos, length_);
+  n = std::min(n, length_ - pos);
+  return std::string(ptr_ + pos, n);
+}
+
+void StringPiece::swap(StringPiece& other) {
+  std::swap(ptr_, other.ptr_);
+  std::swap(length_, other.length_);
+}
+
+StringPiece::size_type StringPiece::copy(char* dest, size_type count,
+                                         size_type pos) const {
+  size_type max_length = std::min(count, length() - pos);
+  memcpy(dest, ptr_ + pos, max_length);
+  return max_length;
+}
 
 const typename StringPiece::size_type StringPiece::npos = -1;
 

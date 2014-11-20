@@ -21,6 +21,7 @@ TEST(TestStringPiece, BasicTest) {
     EXPECT_STREQ(string_piece.ToString().data(), "gPiece Test S");
   }
 }
+
 TEST(TestStringPiece, OperatorTest) {
   // Test operator ==
   {
@@ -42,6 +43,29 @@ TEST(TestStringPiece, OperatorTest) {
     EXPECT_LE(x, z);
     EXPECT_GE(z, x);
   }
+}
+
+TEST(TestStringPiece, SubstrTest) {
+  StringPiece x("abcdef");
+
+  EXPECT_EQ(x.substr(0), "abcdef");
+  EXPECT_EQ(x.substr(1, 2), "bc");
+  EXPECT_EQ(x.substr(0, 100), "abcdef");
+}
+
+TEST(TestStringPiece, CopyTest) {
+  const char* text = "abcdef";
+  StringPiece x(text);
+  char buffer[1024];
+
+  EXPECT_EQ(x.length(), x.copy(buffer, 1024));
+  EXPECT_EQ(0, memcmp(buffer, text, x.length()));
+
+  EXPECT_EQ(x.length() - 1, x.copy(buffer, 1024, 1));
+  EXPECT_EQ(0, memcmp(buffer, text + 1, x.length() - 1));
+
+  EXPECT_EQ(x.length() - 2, x.copy(buffer, x.length() - 2, 1));
+  EXPECT_EQ(0, memcmp(buffer, text + 1, x.length() - 2));
 }
 
 int main(int argc, char* argv[]) {

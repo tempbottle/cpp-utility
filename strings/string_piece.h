@@ -46,7 +46,10 @@ class StringPiece {
 
   bool empty() const { return length_ == 0; }
 
-  void clear() { ptr_ = nullptr; }
+  void clear() {
+    ptr_ = nullptr;
+    length_ = 0;
+  }
 
   void set(const char* str) {
     ptr_ = str;
@@ -96,6 +99,11 @@ class StringPiece {
   }
 
   const_reverse_iterator rend() const { return const_reverse_iterator(ptr_); }
+
+  // String-like fucntion.
+  std::string substr(size_type pos, size_type n = npos) const;
+  size_type copy(char* dest, size_type count, size_type pos = 0) const;
+  void swap(StringPiece& other);
 
  private:
   const char* ptr_;
