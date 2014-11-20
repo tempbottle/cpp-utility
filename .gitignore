@@ -14,3 +14,9 @@
 /Debug
 /Release
 /StringTest
+
+# Ignore CLion IDE files.
+/.idea
+
+# Ignore custom build dir.
+/build
