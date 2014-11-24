@@ -9,3 +9,5 @@ target_link_libraries(strip string_piece)
 
 add_library(split split.cc)
 target_link_libraries(split string_piece)
+
+add_library(encoding encoding.cc)
