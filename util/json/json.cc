@@ -3,8 +3,10 @@
 
 #include <cmath>
 #include <cstdlib>
+
 #include "base/integral_types.h"
 #include "base/macros.h"
+#include "strings/encoding.h"
 
 namespace json {
 
@@ -524,7 +526,7 @@ bool JsonParser::ParseString(Json* json) {
         std::string number = json_data_.substr(0, 4);
         if (IsHex(number)) {
           int32 hex_value = strtol(number.data(), nullptr, 16);
-          // TODO(ronaflx): Investigate how to encode utf-8.
+          EncodeUTF8(hex_value, &json_string);
         } else {
           Fail(Json::INVALID_NUM, "", "");
           return false;
