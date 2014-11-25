@@ -94,6 +94,8 @@ std::string Json::ToString() const {
 
 const JsonValue* Json::GetJsonValue() const { return json_value_.get(); }
 
+bool Json::IsValid() const { return valid_; }
+
 void Json::clear() {
   json_value_.reset();
   valid_ = true;
@@ -124,6 +126,22 @@ bool Json::Parse(const char* json_data) {
 
 bool Json::Parse(const std::string& json_data) {
   return ParseFromString(json_data, this);
+}
+
+#define EXPORT_JSON_API(ret_type, name) \
+  ret_type Json::name() const { return json_value_->name(); }
+
+EXPORT_JSON_API(Json::type, Type)
+EXPORT_JSON_API(double, RealValue)
+EXPORT_JSON_API(int, IntValue)
+EXPORT_JSON_API(bool, BoolValue)
+EXPORT_JSON_API(const std::string&, StringValue)
+EXPORT_JSON_API(const Json::Array&, ArrayValue)
+#undef EXPORT_JSON_API
+
+Json::error_type Json::ErrorType() const { return error_msg_.json_error_type; }
+const Json::ErrorMessage& Json::ReportErrorMessage() const {
+  return error_msg_;
 }
 
 // Implementation JsonValue class.
@@ -181,7 +199,7 @@ class JsonDouble : public JsonValue {
 
 double JsonDouble::RealValue() const { return value_; }
 
-Json::type JsonDouble::Type() const { return Json::JNUMBER; }
+Json::type JsonDouble::Type() const { return Json::JREAL; }
 
 void JsonDouble::Dump(std::string* out) const {
   static char buffer[32];
@@ -201,7 +219,7 @@ class JsonInt : public JsonValue {
   int value_;
 };
 
-Json::type JsonInt::Type() const { return Json::JNUMBER; }
+Json::type JsonInt::Type() const { return Json::JINT; }
 
 int JsonInt::IntValue() const { return value_; }
 
@@ -327,7 +345,8 @@ void JsonObject::Dump(std::string* out) const {
 
 bool JsonParser::Parse() {
   json_->clear();
-  *json_ = ParseInternal();
+  Json val = ParseInternal();
+  json_->json_value_ = val.json_value_;
   return json_->valid_;
 }
 
@@ -337,6 +356,7 @@ Json JsonParser::ParseInternal() {
   if (!json_->valid_) {
     return json;
   }
+  // TODO(ronaflx): deal with legal prefix but illegal token.
   char ch = NextCharacter();
   if (ch == 0) {  // set null if data is empty
     json.json_value_.reset(new JsonNull);
@@ -356,7 +376,7 @@ Json JsonParser::ParseInternal() {
     if (!ParseNumber(&json)) {
       return json;
     }
-  } else if (ch == 'n') {                      // null
+  } else if (ch == 'n') {  // null
     if (json_data_.starts_with("null")) {
       json.json_value_.reset(new JsonNull);
     } else {

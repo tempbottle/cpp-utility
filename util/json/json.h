@@ -18,7 +18,7 @@ class Json {
  public:
   Json();
   // Define type for external use.
-  enum type { JNUL, JNUMBER, JBOOL, JSTRING, JARRAY, JOBJECT };
+  enum type { JNUL, JINT, JREAL, JBOOL, JSTRING, JARRAY, JOBJECT };
   enum error_type {
     NO_ERROR,         // Parse successfully
     END_ERROR,        // Unexpected end of string.
@@ -38,10 +38,8 @@ class Json {
   };
 
   const JsonValue* GetJsonValue() const;
+  bool IsValid() const;
   void clear();
-
-  std::string ToString() const;
-  std::string DebugString(int indent = 2);
 
   // static function to parse json from string.
   // These will return false if parser fail.
@@ -55,11 +53,34 @@ class Json {
   bool Parse(const char* json_data);
   bool Parse(const std::string& json_data);
 
+  // Serialize Json object to string without indent.
+  std::string ToString() const;
+  // Python like api for json oject in human readable way.
+  // Python has dump, dumps, load and loads api.
+  // I only use the s(string) version here.
+  std::string Dump(int indent = 4);
+  void load(const std::string& json_data);
+
+  // Export JsonValue member to Json object.
+  type Type() const;
+  double RealValue() const;
+  int IntValue() const;
+  bool BoolValue() const;
+  const std::string& StringValue() const;
+  const Json::Array& ArrayValue() const;
+  const Json::Object& ObjectValue() const;
+
+  // Function to report Parse error.
+  error_type ErrorType() const;
+  const ErrorMessage& ReportErrorMessage() const;
+
  private:
   // Use shared_ptr instead of unique_ptr, since unqiue_ptr don't allow copy.
   std::shared_ptr<JsonValue> json_value_;
   bool valid_;              // If the json is valid after parse.
   ErrorMessage error_msg_;  // The error message if the json object is invalid.
+
+  // The return value for JsonValue type and called function dismatching.
   static const Json::Array default_array_;
   static const Json::Object default_object_;
   static const std::string default_string_;
