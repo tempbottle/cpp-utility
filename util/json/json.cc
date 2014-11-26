@@ -558,7 +558,6 @@ bool JsonParser::ParseString(Json* json) {
   while (!json_data_.empty() && json_data_[0] != '"') {
     const char ch = json_data_[0];
     if (ch < 0x20) {
-      // TODO(ronaflx): add friendly error message.
       Fail(Json::UNESCAPED_CTRL, "", "");
       return false;
     } else if (ch == '\\') {  // For Json trivial character.
@@ -567,8 +566,7 @@ bool JsonParser::ParseString(Json* json) {
         Fail(Json::BAD_ESCAPED, "", "");
         return false;
       } else if (json_data_[0] == 'u') {  // For unicode
-        // TODO(ronaflx): Json use 4 digit unicode
-        // We need combine 2 unicode sometimes.
+        // TODO(ronaflx): Support other character beside BMP.
         json_data_.remove_prefix(1);
         std::string number = json_data_.substr(0, 4);
         if (IsHex(number)) {

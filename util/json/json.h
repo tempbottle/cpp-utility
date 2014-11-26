@@ -11,6 +11,7 @@
 namespace json {
 class JsonValue;
 
+// For json string, the output is unicode code point, but we store utf8 inside.
 class Json {
   friend class JsonValue;
   friend class JsonParser;
