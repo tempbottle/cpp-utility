@@ -16,7 +16,7 @@ static const Json default_json;
 // Helper
 const char kEscCharEnd[] = {'\"', '\\', 'b', 'f', 'n', 'r', 't', '/'};
 const char kEscChar[] = {'\"', '\\', '\b', '\f', '\n', '\r', '\t', '/'};
-const char* KEscString[] = {"\\\"", "\\\"", "\\b", "\\f",
+const char* KEscString[] = {"\\\"", "\\\\", "\\b", "\\f",
                             "\\n",  "\\r",  "\\t", "\\/"};
 const int kEscSize = arraysize(kEscCharEnd);
 static_assert(arraysize(kEscChar) == kEscSize, "should be equal");
@@ -71,6 +71,7 @@ class JsonParser {
   void ConsumeWhiteSpace();
   char NextCharacter();
   bool IsHex(const std::string& number) const;
+  bool IsNullOrSpace(size_t pos) const;
   // Fail stats will only set to the root of json.
   void Fail(Json::error_type error, const std::string& expect,
             const std::string& actual) const;
@@ -356,37 +357,55 @@ Json JsonParser::ParseInternal() {
   if (!json_->valid_) {
     return json;
   }
-  // TODO(ronaflx): deal with legal prefix but illegal token.
   char ch = NextCharacter();
   if (ch == 0) {  // set null if data is empty
     json.json_value_.reset(new JsonNull);
   } else if (ch == 't') {  // true
-    if (json_data_.starts_with("true")) {
+    if (json_data_.starts_with("true") && IsNullOrSpace(4)) {
       json.json_value_.reset(new JsonBool(true));
     } else {
-      Fail(Json::UNEXPECTED_CHAR, "true", json_data_.substr(0, 4));
+      Fail(Json::UNEXPECTED_CHAR, "true", json_data_.substr(0, 5));
     }
   } else if (ch == 'f') {  // false
-    if (json_data_.starts_with("false")) {
+    if (json_data_.starts_with("false") && IsNullOrSpace(5)) {
       json.json_value_.reset(new JsonBool(false));
     } else {
-      Fail(Json::UNEXPECTED_CHAR, "false", json_data_.substr(0, 4));
+      Fail(Json::UNEXPECTED_CHAR, "false", json_data_.substr(0, 6));
     }
   } else if (ch == '-' || std::isdigit(ch)) {  // number
     if (!ParseNumber(&json)) {
       return json;
     }
   } else if (ch == 'n') {  // null
-    if (json_data_.starts_with("null")) {
+    if (json_data_.starts_with("null") && IsNullOrSpace(4)) {
       json.json_value_.reset(new JsonNull);
     } else {
-      Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 4));
+      Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 5));
     }
   } else if (ch == '"') {  // string
-    if (!ParseString(&json)) {
-      return json;
-    }
+    ParseString(&json);
   } else if (ch == '[') {  // array
+    json_data_.remove_prefix(1);
+    Json::Array json_array;
+    char ch = NextCharacter();
+    while (ch != ']') {
+      Json json_item = ParseInternal();
+      if (!json_->IsValid()) {
+        break;
+      }
+      json_array.push_back(json_item);
+      ch = NextCharacter();
+      if (ch == 0) {
+        Fail(Json::UNEXPECTED_CHAR, ",", "");
+        break;
+      } else if (ch == ',') {
+        ch = NextCharacter();
+      } else if (ch != ']') {
+        Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
+        break;
+      }
+    }
+    json.json_value_.reset(new JsonArray(json_array));
   } else if (ch == '{') {  // object
   } else {
     Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 1));
@@ -418,6 +437,11 @@ bool JsonParser::IsHex(const std::string& number) const {
     }
     return true;
   }
+}
+
+bool JsonParser::IsNullOrSpace(size_t pos) const {
+  size_t n = json_data_.size();
+  return n <= pos || (n > pos && isspace(json_data_[pos]));
 }
 
 void JsonParser::Fail(Json::error_type error, std::string const& expect,
@@ -537,24 +561,28 @@ bool JsonParser::ParseString(Json* json) {
       // TODO(ronaflx): add friendly error message.
       Fail(Json::UNESCAPED_CTRL, "", "");
       return false;
-    } else if (ch == '\\') {
+    } else if (ch == '\\') {  // For Json trivial character.
       json_data_.remove_prefix(1);
       if (json_data_.empty()) {
         Fail(Json::BAD_ESCAPED, "", "");
         return false;
-      } else if (json_data_[0] == 'u') {
+      } else if (json_data_[0] == 'u') {  // For unicode
+        // TODO(ronaflx): Json use 4 digit unicode
+        // We need combine 2 unicode sometimes.
+        json_data_.remove_prefix(1);
         std::string number = json_data_.substr(0, 4);
         if (IsHex(number)) {
           int32 hex_value = strtol(number.data(), nullptr, 16);
           EncodeUTF8(hex_value, &json_string);
+          json_data_.remove_prefix(4);
         } else {
-          Fail(Json::INVALID_NUM, "", "");
+          Fail(Json::INVALID_ESCAPED, "", "");
           return false;
         }
-      } else {
-        // For " \ and control character.
+      } else {  // For " \ and escaped character.
         size_t escape_id =
-            std::find(kEscCharEnd, kEscCharEnd + kEscSize, ch) - kEscCharEnd;
+            std::find(kEscCharEnd, kEscCharEnd + kEscSize, json_data_[0]) -
+            kEscCharEnd;
         if (escape_id != kEscSize) {
           json_string += kEscChar[escape_id];
           json_data_.remove_prefix(1);
@@ -563,7 +591,7 @@ bool JsonParser::ParseString(Json* json) {
           return false;
         }
       }
-    } else {
+    } else {  // For json non-trivial character.
       json_string += ch;
       json_data_.remove_prefix(1);
     }
@@ -571,7 +599,7 @@ bool JsonParser::ParseString(Json* json) {
 
   // Valid json string should end with “double quote”
   if (json_data_.empty()) {
-    Fail(Json::END_ERROR, "\"", json_data_.substr(0, 1));
+    Fail(Json::END_ERROR, "\"", "");
     return false;
   }
   json_data_.remove_prefix(1);
