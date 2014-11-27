@@ -70,6 +70,8 @@ class Json {
   const std::string& StringValue() const;
   const Json::Array& ArrayValue() const;
   const Json::Object& ObjectValue() const;
+  const Json& operator[](size_t pos) const;
+  const Json& operator[](const std::string& key) const;
 
   // Function to report Parse error.
   error_type ErrorType() const;

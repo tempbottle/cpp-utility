@@ -144,6 +144,14 @@ EXPORT_JSON_API(int, IntValue)
 EXPORT_JSON_API(bool, BoolValue)
 EXPORT_JSON_API(const std::string&, StringValue)
 EXPORT_JSON_API(const Json::Array&, ArrayValue)
+
+const Json& Json::operator[](size_t pos) const {
+  return (*json_value_)[pos];
+}
+
+const Json& Json::operator[](const std::string& key) const {
+  return (*json_value_)[key];
+}
 #undef EXPORT_JSON_API
 
 Json::error_type Json::ErrorType() const { return error_msg_.json_error_type; }
