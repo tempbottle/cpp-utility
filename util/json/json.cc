@@ -54,7 +54,9 @@ static void DumpString(const std::string& value, std::string* out) {
   }
 }
 
-// Json Parser. This class should not be invisible for external.
+// Json Parser.
+// This class should not be invisible for external.
+// The reference: http://www.json.org/draft-crockford-jsonorg-json-04.txt
 class JsonParser {
  public:
   JsonParser(const char* json_data, size_t length, Json* json)
@@ -68,6 +70,10 @@ class JsonParser {
   Json* json_;
 
   // Function to help parse.
+  // Json White Space is define in beginning of section 2. JSON Grammar
+  bool IsJsonWhiteSpace(char ch) const;
+  // Literal names only contains false, null, true. and **must** be lower case.
+  bool ParseLiteral(const char*, size_t len);
   void ConsumeWhiteSpace();
   char NextCharacter();
   bool IsHex(const std::string& number) const;
@@ -352,7 +358,7 @@ bool JsonParser::Parse() {
     char ch = NextCharacter();
     if (ch != 0) {
       json_->valid_ = false;
-      json_->error_msg_.json_error_type = Json::END_ERROR;
+      json_->error_msg_.json_error_type = Json::UNEXPECTED_CHAR;
     }
   }
   return json_->valid_;
@@ -368,28 +374,19 @@ Json JsonParser::ParseInternal() {
   if (ch == 0) {  // set null if data is empty
     json.json_value_.reset(new JsonNull);
   } else if (ch == 't') {  // true
-    if (json_data_.starts_with("true")) {
+    if (ParseLiteral("true", 4)) {
       json.json_value_.reset(new JsonBool(true));
-      json_data_.remove_prefix(4);
-    } else {
-      Fail(Json::UNEXPECTED_CHAR, "true", json_data_.substr(0, 5));
     }
   } else if (ch == 'f') {  // false
-    if (json_data_.starts_with("false")) {
+    if (ParseLiteral("false", 5)) {
       json.json_value_.reset(new JsonBool(false));
-      json_data_.remove_prefix(5);
-    } else {
-      Fail(Json::UNEXPECTED_CHAR, "false", json_data_.substr(0, 6));
+    }
+  } else if (ch == 'n') {  // null
+    if (ParseLiteral("null", 4)) {
+      json.json_value_.reset(new JsonNull);
     }
   } else if (ch == '-' || std::isdigit(ch)) {  // number
     ParseNumber(&json);
-  } else if (ch == 'n') {  // null
-    if (json_data_.starts_with("null")) {
-      json.json_value_.reset(new JsonNull);
-      json_data_.remove_prefix(4);
-    } else {
-      Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 5));
-    }
   } else if (ch == '"') {  // string
     ParseString(&json);
   } else if (ch == '[') {  // array
@@ -420,14 +417,25 @@ Json JsonParser::ParseInternal() {
   } else {
     Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 1));
   }
-  if (json_->IsValid() && !IsNullOrSeparator(0)) {
-    Fail(Json::UNEXPECTED_CHAR, "", json_data_.substr(0, 1));
-  }
   return json;
 }
 
+bool JsonParser::IsJsonWhiteSpace(char ch) const {
+  return ch == 0x20 || ch == 0x09 || ch == 0x0A || ch == 0x0D;
+}
+
+bool JsonParser::ParseLiteral(const char* literal, size_t len) {
+  if (json_data_.starts_with(literal)) {
+    json_data_.remove_prefix(len);
+    return true;
+  } else {
+    Fail(Json::UNEXPECTED_CHAR, literal, json_data_.substr(0, len));
+    return false;
+  }
+}
+
 void JsonParser::ConsumeWhiteSpace() {
-  while (!json_data_.empty() && isspace(json_data_[0])) {
+  while (!json_data_.empty() && IsJsonWhiteSpace(json_data_[0])) {
     json_data_.remove_prefix(1);
   }
 }
@@ -454,8 +462,9 @@ bool JsonParser::IsHex(const std::string& number) const {
 
 bool JsonParser::IsNullOrSeparator(size_t pos) const {
   size_t n = json_data_.size();
-  return n <= pos || isspace(json_data_[pos]) || json_data_[pos] == ',' ||
-         json_data_[pos] == ']' || json_data_[pos] == '}';
+  return n <= pos || IsJsonWhiteSpace(json_data_[pos]) ||
+         json_data_[pos] == ',' || json_data_[pos] == ']' ||
+         json_data_[pos] == '}';
 }
 
 void JsonParser::Fail(Json::error_type error, std::string const& expect,
