@@ -70,10 +70,16 @@ class JsonParser {
   Json* json_;
 
   // Function to help parse.
-  // Json White Space is define in beginning of section 2. JSON Grammar
+  // Json White Space is defined in beginning of section 2. JSON Grammar
   bool IsJsonWhiteSpace(char ch) const;
   // Literal names only contains false, null, true. and **must** be lower case.
   bool ParseLiteral(const char*, size_t len);
+  // Json string is defined in 2.5. Strings.
+  bool ParseString(Json* json);
+  // Json numbers is defined in 2.4. Numbers.
+  bool ParseNumber(Json* json);
+  // Json array is defined in 2.3. Arrays.
+  bool ParseArray(Json* json);
   void ConsumeWhiteSpace();
   char NextCharacter();
   bool IsHex(const std::string& number) const;
@@ -81,9 +87,6 @@ class JsonParser {
   // Fail stats will only set to the root of json.
   void Fail(Json::error_type error, const std::string& expect,
             const std::string& actual) const;
-  // Parse number and string into json object.
-  bool ParseString(Json* json);
-  bool ParseNumber(Json* json);
 };
 
 // Implementation Json class
@@ -290,7 +293,6 @@ class JsonArray : public JsonValue {
   JsonArray() {}
   explicit JsonArray(const Json::Array& value) : value_(value) {}
   explicit JsonArray(Json::Array&& value) : value_(std::move(value)) {}
-  // JsonArray(Json::Array&& value) : value_(std::move(value)) {}
   virtual void Dump(std::string* out) const;
 
   virtual const Json& operator[](size_t pos) const override;
@@ -398,29 +400,7 @@ Json JsonParser::ParseInternal() {
   } else if (ch == '"') {  // string
     ParseString(&json);
   } else if (ch == '[') {  // array
-    json_data_.remove_prefix(1);
-    Json::Array json_array;
-    char ch = NextCharacter();
-    while (ch != ']') {
-      Json json_item = ParseInternal();
-      if (!json_->IsValid()) {
-        break;
-      }
-      json_array.push_back(json_item);
-      ch = NextCharacter();
-      if (ch == 0) {
-        Fail(Json::UNEXPECTED_CHAR, ",", "");
-        break;
-      } else if (ch == ',') {
-        json_data_.remove_prefix(1);
-        ch = NextCharacter();
-      } else if (ch != ']') {
-        Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
-        break;
-      }
-    }
-    json_data_.remove_prefix(1);
-    json.json_value_.reset(new JsonArray(json_array));
+    ParseArray(&json);
   } else if (ch == '{') {  // object
   } else {
     Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 1));
@@ -575,6 +555,36 @@ bool JsonParser::ParseNumber(Json* json) {
   }
   float_res *= pow(base, exponent);
   json->json_value_.reset(new JsonDouble(is_negative ? -float_res : float_res));
+  return true;
+}
+
+bool JsonParser::ParseArray(Json* json) {
+  if (json_data_.empty() || json_data_[0] != '[') {
+    return false;
+  }
+  json_data_.remove_prefix(1);
+  Json::Array json_array;
+  char ch = NextCharacter();
+  while (ch != ']') {
+    Json json_item = ParseInternal();
+    if (!json_->IsValid()) {
+      break;
+    }
+    json_array.push_back(json_item);
+    ch = NextCharacter();
+    if (ch == 0) {
+      Fail(Json::UNEXPECTED_CHAR, ",", "");
+      return false;
+    } else if (ch == ',') {
+      json_data_.remove_prefix(1);
+      ch = NextCharacter();
+    } else if (ch != ']') {
+      Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
+      return false;
+    }
+  }
+  json_data_.remove_prefix(1);
+  json->json_value_.reset(new JsonArray(std::move(json_array)));
   return true;
 }
 
