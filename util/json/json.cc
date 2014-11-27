@@ -75,11 +75,14 @@ class JsonParser {
   // Literal names only contains false, null, true. and **must** be lower case.
   bool ParseLiteral(const char*, size_t len);
   // Json string is defined in 2.5. Strings.
-  bool ParseString(Json* json);
+  bool ParseString(std::string* json_string);
   // Json numbers is defined in 2.4. Numbers.
   bool ParseNumber(Json* json);
   // Json array is defined in 2.3. Arrays.
   bool ParseArray(Json* json);
+  // Json object is defined in 2.2. Objects.
+  bool ParseObject(Json* json);
+
   void ConsumeWhiteSpace();
   char NextCharacter();
   bool IsHex(const std::string& number) const;
@@ -398,10 +401,14 @@ Json JsonParser::ParseInternal() {
   } else if (ch == '-' || std::isdigit(ch)) {  // number
     ParseNumber(&json);
   } else if (ch == '"') {  // string
-    ParseString(&json);
+    std::string json_string;
+    if (ParseString(&json_string)) {
+      json.json_value_.reset(new JsonString(json_string));
+    }
   } else if (ch == '[') {  // array
     ParseArray(&json);
   } else if (ch == '{') {  // object
+    ParseObject(&json);
   } else {
     Fail(Json::UNEXPECTED_CHAR, "null", json_data_.substr(0, 1));
   }
@@ -568,7 +575,7 @@ bool JsonParser::ParseArray(Json* json) {
   while (ch != ']') {
     Json json_item = ParseInternal();
     if (!json_->IsValid()) {
-      break;
+      return false;
     }
     json_array.push_back(json_item);
     ch = NextCharacter();
@@ -588,14 +595,51 @@ bool JsonParser::ParseArray(Json* json) {
   return true;
 }
 
-bool JsonParser::ParseString(Json* json) {
+bool JsonParser::ParseObject(Json* json) {
+  if (json_data_.empty() || json_data_[0] != '{') {
+    return false;
+  }
+  json_data_.remove_prefix(1);
+  Json::Object object;
+  char ch = NextCharacter();
+  while (ch != '}') {
+    std::string key;
+    if (!ParseString(&key)) {
+      return false;
+    }
+    ch = NextCharacter();
+    if (ch != ':') {
+      Fail(Json::UNEXPECTED_CHAR, ":", "");
+      return false;
+    }
+    object[key] = ParseInternal();
+    if (!json_->IsValid()) {
+      return false;
+    }
+    ch = NextCharacter();
+    if (ch == 0) {
+      Fail(Json::UNEXPECTED_CHAR, ",", "");
+      return false;
+    } else if (ch == ',') {
+      json_data_.remove_prefix(1);
+      ch = NextCharacter();
+    } else if (ch != '}') {
+      Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
+      return false;
+    }
+  }
+  json_data_.remove_prefix(1);
+  json->json_value_.reset(new JsonObject(object));
+  return true;
+}
+
+bool JsonParser::ParseString(std::string* json_string) {
   // Valid json string should start with “double quote”
   if (json_data_.empty() || json_data_[0] != '"') {
     return false;
   }
   json_data_.remove_prefix(1);
 
-  std::string json_string;
   while (!json_data_.empty() && json_data_[0] != '"') {
     const char ch = json_data_[0];
     if (ch < 0x20) {
@@ -612,7 +656,7 @@ bool JsonParser::ParseString(Json* json) {
         std::string number = json_data_.substr(0, 4);
         if (IsHex(number)) {
           int32 hex_value = strtol(number.data(), nullptr, 16);
-          EncodeUTF8(hex_value, &json_string);
+          EncodeUTF8(hex_value, json_string);
           json_data_.remove_prefix(4);
         } else {
           Fail(Json::INVALID_ESCAPED, "", "");
@@ -623,7 +667,7 @@ bool JsonParser::ParseString(Json* json) {
             std::find(kEscCharEnd, kEscCharEnd + kEscSize, json_data_[0]) -
             kEscCharEnd;
         if (escape_id != kEscSize) {
-          json_string += kEscChar[escape_id];
+          *json_string += kEscChar[escape_id];
           json_data_.remove_prefix(1);
         } else {
           Fail(Json::BAD_ESCAPED, "", "");
@@ -631,7 +675,7 @@ bool JsonParser::ParseString(Json* json) {
         }
       }
     } else {  // For json non-trivial character.
-      json_string += ch;
+      *json_string += ch;
       json_data_.remove_prefix(1);
     }
   }
@@ -642,7 +686,6 @@ bool JsonParser::ParseString(Json* json) {
     return false;
   }
   json_data_.remove_prefix(1);
-  json->json_value_.reset(new JsonString(json_string));
   return true;
 }
 
