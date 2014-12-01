@@ -1,5 +1,6 @@
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 add_subdirectory(csv)
+add_subdirectory(json)
 
 add_executable(registerer_test registerer_test.cc)
 target_link_libraries(registerer_test gtest boost_thread-mt boost_system-mt)
