@@ -150,6 +150,7 @@ EXPORT_JSON_API(int, IntValue)
 EXPORT_JSON_API(bool, BoolValue)
 EXPORT_JSON_API(const std::string&, StringValue)
 EXPORT_JSON_API(const Json::Array&, ArrayValue)
+EXPORT_JSON_API(const Json::Object&, ObjectValue)
 
 const Json& Json::operator[](size_t pos) const {
   return (*json_value_)[pos];
@@ -384,9 +385,7 @@ Json JsonParser::ParseInternal() {
     return json;
   }
   char ch = NextCharacter();
-  if (ch == 0) {  // set null if data is empty
-    json.json_value_.reset(new JsonNull);
-  } else if (ch == 't') {  // true
+  if (ch == 't') {  // true
     if (ParseLiteral("true", 4)) {
       json.json_value_.reset(new JsonBool(true));
     }
@@ -588,6 +587,9 @@ bool JsonParser::ParseArray(Json* json) {
     } else if (ch == ',') {
       json_data_.remove_prefix(1);
       ch = NextCharacter();
+      if (ch == ']') {
+        Fail(Json::UNEXPECTED_CHAR, "", "");
+      }
     } else if (ch != ']') {
       Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
       return false;
@@ -605,6 +607,7 @@ bool JsonParser::ParseObject(Json* json) {
   while (ch != '}') {
     std::string key;
     if (!ParseString(&key)) {
+      Fail(Json::UNEXPECTED_CHAR, "}", "");
       return false;
     }
     ch = NextCharacter();
@@ -612,6 +615,7 @@ bool JsonParser::ParseObject(Json* json) {
       Fail(Json::UNEXPECTED_CHAR, ":", "");
       return false;
     }
+    json_data_.remove_prefix(1);
     object[key] = ParseInternal();
     if (!json_->IsValid()) {
       return false;
@@ -623,6 +627,9 @@ bool JsonParser::ParseObject(Json* json) {
     } else if (ch == ',') {
       json_data_.remove_prefix(1);
       ch = NextCharacter();
+      if (ch == '}') {
+        Fail(Json::UNEXPECTED_CHAR, "\"", "}");
+      }
     } else if (ch != '}') {
       Fail(Json::UNEXPECTED_CHAR, "]", json_data_.substr(0, 1));
       return false;
