@@ -419,16 +419,6 @@ bool JsonParser::IsJsonWhiteSpace(char ch) const {
   return ch == 0x20 || ch == 0x09 || ch == 0x0A || ch == 0x0D;
 }
 
-bool JsonParser::ParseLiteral(const char* literal, size_t len) {
-  if (json_data_.starts_with(literal)) {
-    json_data_.remove_prefix(len);
-    return true;
-  } else {
-    Fail(Json::UNEXPECTED_CHAR, literal, json_data_.substr(0, len));
-    return false;
-  }
-}
-
 void JsonParser::ConsumeWhiteSpace() {
   while (!json_data_.empty() && IsJsonWhiteSpace(json_data_[0])) {
     json_data_.remove_prefix(1);
@@ -469,6 +459,16 @@ void JsonParser::Fail(Json::error_type error, std::string const& expect,
   json_->error_msg_.pos = length_ - json_data_.length();
   json_->error_msg_.actual = actual;
   json_->error_msg_.expect = expect;
+}
+
+bool JsonParser::ParseLiteral(const char* literal, size_t len) {
+  if (json_data_.starts_with(literal)) {
+    json_data_.remove_prefix(len);
+    return true;
+  } else {
+    Fail(Json::UNEXPECTED_CHAR, literal, json_data_.substr(0, len));
+    return false;
+  }
 }
 
 bool JsonParser::ParseNumber(Json* json) {
@@ -565,11 +565,14 @@ bool JsonParser::ParseNumber(Json* json) {
   return true;
 }
 
+#define FIRST_CHARACTER_CHECK(ch) \
+  if (json_data_.empty() || json_data_[0] != ch) { \
+    return false; \
+  } \
+  json_data_.remove_prefix(1)
+
 bool JsonParser::ParseArray(Json* json) {
-  if (json_data_.empty() || json_data_[0] != '[') {
-    return false;
-  }
-  json_data_.remove_prefix(1);
+  FIRST_CHARACTER_CHECK('[');
   Json::Array json_array;
   char ch = NextCharacter();
   while (ch != ']') {
@@ -580,7 +583,7 @@ bool JsonParser::ParseArray(Json* json) {
     json_array.push_back(json_item);
     ch = NextCharacter();
     if (ch == 0) {
-      Fail(Json::UNEXPECTED_CHAR, ",", "");
+      Fail(Json::UNEXPECTED_CHAR, "]", "");
       return false;
     } else if (ch == ',') {
       json_data_.remove_prefix(1);
@@ -596,10 +599,7 @@ bool JsonParser::ParseArray(Json* json) {
 }
 
 bool JsonParser::ParseObject(Json* json) {
-  if (json_data_.empty() || json_data_[0] != '{') {
-    return false;
-  }
-  json_data_.remove_prefix(1);
+  FIRST_CHARACTER_CHECK('{');
   Json::Object object;
   char ch = NextCharacter();
   while (ch != '}') {
@@ -634,12 +634,7 @@ bool JsonParser::ParseObject(Json* json) {
 }
 
 bool JsonParser::ParseString(std::string* json_string) {
-  // Valid json string should start with “double quote”
-  if (json_data_.empty() || json_data_[0] != '"') {
-    return false;
-  }
-  json_data_.remove_prefix(1);
-
+  FIRST_CHARACTER_CHECK('"');
   while (!json_data_.empty() && json_data_[0] != '"') {
     const char ch = json_data_[0];
     if (ch < 0x20) {
@@ -689,4 +684,5 @@ bool JsonParser::ParseString(std::string* json_string) {
   return true;
 }
 
+#undef FIRST_CHARACTER_CHECK
 }  // namespace json
