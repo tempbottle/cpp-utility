@@ -11,19 +11,22 @@ TEST(JsonTest, SimpleJsonValueGood) {
   const std::string integer = "1234567";
   ASSERT_TRUE(json.Parse(integer));
   EXPECT_EQ(Json::JINT, json.Type());
+  EXPECT_EQ("1234567", json.Dump());
 
   const std::string true_value = "true\n";
   ASSERT_TRUE(json.Parse(true_value));
   EXPECT_EQ(Json::JBOOL, json.Type());
+  EXPECT_EQ("true", json.Dump());
 
   const std::string false_value = "false ";
   ASSERT_TRUE(json.Parse(false_value));
   EXPECT_EQ(Json::JBOOL, json.Type());
+  EXPECT_EQ("false", json.Dump());
 
   const std::string null_value = "null";
   ASSERT_TRUE(json.Parse(null_value));
   EXPECT_EQ(Json::JNUL, json.Type());
-
+  EXPECT_EQ("null", json.Dump());
 }
 
 TEST(JsonTest, SimpleJsonValueBad) {
@@ -64,21 +67,26 @@ TEST(JsonTest, ParseJsonStringGood) {
   ASSERT_TRUE(json.Parse(control_character));
   EXPECT_EQ(Json::JSTRING, json.Type());
   EXPECT_EQ("\x10\x3\x1\x2", json.StringValue());
+  EXPECT_EQ("\"\\u0010\\u0003\\u0001\\u0002\"", json.Dump());
 
-  const std::string escaped_character = "\"\\\\\\\"\\b\\f\\n\\r\\t\\/\"";
+  const std::string escaped_character = "\"\\\\\\\"\\b\\f\\n\\r\\t\"";
   ASSERT_TRUE(json.Parse(escaped_character));
   EXPECT_EQ(Json::JSTRING, json.Type());
-  EXPECT_EQ("\\\"\b\f\n\r\t/", json.StringValue());
+  EXPECT_EQ("\\\"\b\f\n\r\t", json.StringValue());
+  EXPECT_EQ("\"\\\\\\\"\\b\\f\\n\\r\\t\"", json.Dump());
 
   const std::string& normal_string = "\"normal_string\"";
   ASSERT_TRUE(json.Parse(normal_string));
   EXPECT_EQ(Json::JSTRING, json.Type());
   EXPECT_EQ("normal_string", json.StringValue());
+  EXPECT_EQ("\"normal_string\"", json.Dump());
 
   const std::string utf8_string = "\"\\u0080\\u0800\"";
   ASSERT_TRUE(json.Parse(utf8_string));
   EXPECT_EQ(Json::JSTRING, json.Type());
   EXPECT_EQ("\xC2\x80\xE0\xA0\x80", json.StringValue());
+  // TODO(ronaflx): enable this test case.
+  // EXPECT_EQ("\"\\u0080\\u0800\"", json.Dump());
 }
 
 TEST(JsonTest, ParseJsonStringBad) {
@@ -111,35 +119,46 @@ TEST(JsonTest, ParseJsonNumberGood) {
   ASSERT_TRUE(json.Parse("-10000"));
   EXPECT_EQ(Json::JINT, json.Type());
   EXPECT_EQ(-10000, json.IntValue());
+  EXPECT_EQ("-10000", json.Dump());
 
   // Zero
   ASSERT_TRUE(json.Parse("0"));
   EXPECT_EQ(Json::JINT, json.Type());
   EXPECT_EQ(0, json.IntValue());
+  EXPECT_EQ("0", json.Dump());
 
   // Positive / negative float number.
   ASSERT_TRUE(json.Parse("1231.123201"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(1231.123201, json.RealValue());
+  EXPECT_EQ("1231.123201", json.Dump());
+
   ASSERT_TRUE(json.Parse("-5678.01230"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(-5678.0123, json.RealValue());
+  EXPECT_EQ("-5678.0123", json.Dump());
 
   // Positive / negative scientific notation.
   ASSERT_TRUE(json.Parse("2e14"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(2e14, json.RealValue());
+  EXPECT_EQ("2e+14", json.Dump());
+
   ASSERT_TRUE(json.Parse("-12e14"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(-12e14, json.RealValue());
+  EXPECT_EQ("-1.2e+15", json.Dump());
 
   // Negative exponent.
   ASSERT_TRUE(json.Parse("3e-4"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(3e-4, json.RealValue());
+  EXPECT_EQ("0.0003", json.Dump());
+
   ASSERT_TRUE(json.Parse("-2e-5"));
   EXPECT_EQ(Json::JREAL, json.Type());
   EXPECT_DOUBLE_EQ(-2e-5, json.RealValue());
+  EXPECT_EQ("-2e-05", json.Dump());
 
   // Decimal and scientific notation.
   ASSERT_TRUE(json.Parse("32.12e5"));
@@ -200,6 +219,8 @@ TEST(JsonTest, ParseJsonArrayGood) {
     const Json::Array& json_array = json.ArrayValue();
     EXPECT_EQ(0, json_array.size());
   }
+  EXPECT_EQ("[\n]", json.Dump());
+
   ASSERT_TRUE(json.Parse("[true, false]"));
   {
     const Json::Array& json_array = json.ArrayValue();
@@ -209,7 +230,9 @@ TEST(JsonTest, ParseJsonArrayGood) {
     EXPECT_EQ(Json::JBOOL, json_array[1].Type());
     EXPECT_EQ(false, json_array[1].BoolValue());
   }
+
   ASSERT_TRUE(json.Parse("[true, 1e20, \"abcde\\\\\\\"\"]"));
+  EXPECT_EQ("[\n  true,\n  1e+20,\n  \"abcde\\\\\\\"\"\n]", json.Dump(2));
   {
     const Json::Array& json_array = json.ArrayValue();
     EXPECT_EQ(3, json_array.size());
@@ -220,7 +243,13 @@ TEST(JsonTest, ParseJsonArrayGood) {
     EXPECT_EQ(Json::JSTRING, json_array[2].Type());
     EXPECT_EQ("abcde\\\"", json_array[2].StringValue());
   }
+
   ASSERT_TRUE(json.Parse("[[], [1, 2, 3.0], [\"a\", \"b\", [\"c\"]]]"));
+  EXPECT_EQ(
+      "[\n  [\n  ],\n  [\n    1,\n    2,\n    3\n  ],\n  [\n    \"a\",\n    "
+      "\"b\",\n    [\n      \"c\"\n    ]\n  ]\n]",
+      json.Dump(2));
+
   {
     const Json::Array& json_array = json.ArrayValue();
     EXPECT_EQ(3, json_array.size());
@@ -265,10 +294,15 @@ TEST(JsonTest, ParseJsonArrayBad) {
 TEST(JsonTest, ParseJsonObjectGood) {
   Json json;
   ASSERT_TRUE(json.Parse("{}"));
+  EXPECT_EQ("{\n}", json.Dump());
   EXPECT_EQ(Json::JOBJECT, json.Type());
   EXPECT_EQ(0, json.ObjectValue().size());
 
   ASSERT_TRUE(json.Parse("{\"abcd\" : 123, \"efg\": true, \"hig\": 1.2}"));
+  EXPECT_EQ(
+      "{\n    \"abcd\":\n    123,\n    \"efg\":\n    true,\n    \"hig\":\n    "
+      "1.2\n}",
+      json.Dump());
   EXPECT_EQ(Json::JOBJECT, json.Type());
   EXPECT_EQ(3, json.ObjectValue().size());
   EXPECT_EQ(Json::JINT, json["abcd"].Type());
@@ -280,6 +314,12 @@ TEST(JsonTest, ParseJsonObjectGood) {
 
   ASSERT_TRUE(
       json.Parse("{\"123\": 123, \"456\": {\"123\": 456}, \"2\": \"22\"}"));
+  EXPECT_EQ(
+      "{\n  \"123\":\n  123,\n  \"2\":\n  \"22\",\n  \"456\":\n  {\n    "
+      "\"123\":\n    456\n  }\n}",
+      json.Dump(2));
+  EXPECT_EQ("{\"123\": 123, \"2\": \"22\", \"456\": {\"123\": 456}}",
+            json.ToString());
   EXPECT_EQ(Json::JOBJECT, json.Type());
   EXPECT_EQ(3, json.ObjectValue().size());
   EXPECT_EQ(Json::JINT, json["123"].Type());

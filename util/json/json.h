@@ -59,8 +59,8 @@ class Json {
   // Python like api for json oject in human readable way.
   // Python has dump, dumps, load and loads api.
   // I only use the s(string) version here.
-  std::string Dump(int indent = 4);
-  void load(const std::string& json_data);
+  std::string Dump(int indent = 4) const;
+  void Dump(std::string* out, int indent = 4) const;
 
   // Export JsonValue member to Json object.
   type Type() const;
@@ -105,7 +105,8 @@ class JsonValue {
   virtual const Json& operator[](const std::string& key) const;
 
   // For Dump compressed text to string.
-  virtual void Dump(std::string* out) const = 0;
+  virtual void Dump(std::string* out, bool break_line, int space,
+                    int indent) const = 0;
 };
 
 class JsonNull;

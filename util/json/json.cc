@@ -7,6 +7,7 @@
 #include "base/integral_types.h"
 #include "base/macros.h"
 #include "strings/encoding.h"
+#include "strings/stringprintf.h"
 
 namespace json {
 
@@ -35,7 +36,7 @@ static void DumpString(const std::string& value, std::string* out) {
     char ch = value[i];
     size_t escape_id = std::find(kEscChar, kEscChar + kEscSize, ch) - kEscChar;
     if (escape_id != kEscSize) {
-      out->append(KEscString[i]);
+      out->append(KEscString[escape_id]);
     } else if (ch < 0x20) {
       char buf[8];
       snprintf(buf, sizeof(buf), "\\u%04x", ch);
@@ -52,6 +53,7 @@ static void DumpString(const std::string& value, std::string* out) {
       out->append(1, ch);
     }
   }
+  out->append(1, '\"');
 }
 
 // Json Parser.
@@ -101,8 +103,18 @@ Json::Json() : json_value_(nullptr), valid_(true) {}
 
 std::string Json::ToString() const {
   std::string result;
-  json_value_->Dump(&result);
+  json_value_->Dump(&result, false, 0, 0);
   return result;
+}
+
+std::string Json::Dump(int indent) const {
+  std::string result;
+  Dump(&result, indent);
+  return result;
+}
+
+void Json::Dump(std::string* out, int indent) const {
+  json_value_->Dump(out, true, 0, indent);
 }
 
 const JsonValue* Json::GetJsonValue() const { return json_value_.get(); }
@@ -199,21 +211,26 @@ const Json& JsonValue::operator[](const std::string& key) const {
 // Function dump(): dump formatted text for each subclass.
 class JsonNull : public JsonValue {
  public:
-  virtual Json::type Type() const;
-  virtual void Dump(std::string* out) const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 };
 
 Json::type JsonNull::Type() const { return Json::JNUL; }
 
-void JsonNull::Dump(std::string* out) const { out->append("null"); }
+void JsonNull::Dump(std::string* out, bool break_line, int space,
+                    int indent) const {
+  StringPrintfAppend(out, "%*snull", space, "");
+}
 
 class JsonDouble : public JsonValue {
  public:
   JsonDouble() : value_(0) {}
   explicit JsonDouble(double value) : value_(value) {}
-  virtual double RealValue() const override;
-  virtual Json::type Type() const;
-  virtual void Dump(std::string*) const override;
+  double RealValue() const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
  private:
   double value_;
@@ -223,19 +240,19 @@ double JsonDouble::RealValue() const { return value_; }
 
 Json::type JsonDouble::Type() const { return Json::JREAL; }
 
-void JsonDouble::Dump(std::string* out) const {
-  static char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%.10g", value_);
-  out->append(buffer);
+void JsonDouble::Dump(std::string* out, bool break_line, int space,
+                      int indent) const {
+  StringPrintfAppend(out, "%*s%.10g", space, "", value_);
 }
 
 class JsonInt : public JsonValue {
  public:
   JsonInt() : value_(0) {}
   explicit JsonInt(int value) : value_(value) {}
-  virtual int IntValue() const override;
-  virtual Json::type Type() const;
-  virtual void Dump(std::string* out) const;
+  int IntValue() const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
  private:
   int value_;
@@ -245,19 +262,19 @@ Json::type JsonInt::Type() const { return Json::JINT; }
 
 int JsonInt::IntValue() const { return value_; }
 
-void JsonInt::Dump(std::string* out) const {
-  static char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%d", value_);
-  out->append(buffer);
+void JsonInt::Dump(std::string* out, bool break_line, int space,
+                   int indent) const {
+  StringPrintfAppend(out, "%*s%d", space, "", value_);
 }
 
 class JsonBool : public JsonValue {
  public:
   JsonBool() : value_(false) {}
   explicit JsonBool(bool value) : value_(value) {}
-  virtual bool BoolValue() const override;
-  virtual Json::type Type() const;
-  virtual void Dump(std::string* out) const;
+  bool BoolValue() const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
  private:
   bool value_;
@@ -267,8 +284,9 @@ Json::type JsonBool::Type() const { return Json::JBOOL; }
 
 bool JsonBool::BoolValue() const { return value_; }
 
-void JsonBool::Dump(std::string* out) const {
-  out->append(value_ ? "true" : "false");
+void JsonBool::Dump(std::string* out, bool break_line, int space,
+                    int indent) const {
+  StringPrintfAppend(out, "%*s%s", space, "", value_ ? "true" : "false");
 }
 
 class JsonString : public JsonValue {
@@ -276,9 +294,10 @@ class JsonString : public JsonValue {
   JsonString() {}
   explicit JsonString(const std::string& value) : value_(value) {}
   explicit JsonString(std::string&& value) : value_(std::move(value)) {}
-  virtual const std::string& StringValue() const override;
-  virtual Json::type Type() const;
-  virtual void Dump(std::string* out) const override;
+  const std::string& StringValue() const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
  private:
   std::string value_;
@@ -290,18 +309,23 @@ const std::string& JsonString::StringValue() const { return value_; }
 
 // For string value, if the char is \\ or \" add a `\\` in front.
 // if the char is \t, \b, \n, \f or \r, output the c-style char.
-void JsonString::Dump(std::string* out) const { DumpString(value_, out); }
+void JsonString::Dump(std::string* out, bool break_line, int space,
+                      int indent) const {
+  StringPrintfAppend(out, "%*s", space, "");
+  DumpString(value_, out);
+}
 
 class JsonArray : public JsonValue {
  public:
   JsonArray() {}
   explicit JsonArray(const Json::Array& value) : value_(value) {}
   explicit JsonArray(Json::Array&& value) : value_(std::move(value)) {}
-  virtual void Dump(std::string* out) const;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
-  virtual const Json& operator[](size_t pos) const override;
-  virtual const Json::Array& ArrayValue() const override;
-  virtual Json::type Type() const;
+  const Json& operator[](size_t pos) const override;
+  const Json::Array& ArrayValue() const override;
+  Json::type Type() const override;
 
  private:
   Json::Array value_;
@@ -311,17 +335,19 @@ Json::type JsonArray::Type() const { return Json::JARRAY; }
 
 const Json::Array& JsonArray::ArrayValue() const { return value_; }
 
-void JsonArray::Dump(std::string* out) const {
+void JsonArray::Dump(std::string* out, bool break_line, int space,
+                     int indent) const {
   bool add_comma = false;
-  out->append(1, '[');
+  StringPrintfAppend(out, "%*s[%s", space, "", break_line ? "\n" : "");
   for (const Json& json : value_) {
     if (add_comma) {
-      out->append(", ");
+      out->append(break_line ? ",\n" : ", ");
     }
-    json.GetJsonValue()->Dump(out);
+    json.GetJsonValue()->Dump(out, break_line, space + indent, indent);
     add_comma = true;
   }
-  out->append(1, ']');
+  if (!value_.empty() && break_line) out->append(1, '\n');
+  StringPrintfAppend(out, "%*s]", space, "");
 }
 
 const Json& JsonArray::operator[](size_t pos) const { return value_[pos]; }
@@ -331,10 +357,11 @@ class JsonObject : public JsonValue {
   JsonObject() {}
   explicit JsonObject(const Json::Object& value) : value_(value) {}
   explicit JsonObject(Json::Object&& value) : value_(std::move(value)) {}
-  virtual const Json& operator[](const std::string& key) const override;
-  virtual const Json::Object& ObjectValue() const override;
-  virtual Json::type Type() const;
-  virtual void Dump(std::string* out) const;
+  const Json& operator[](const std::string& key) const override;
+  const Json::Object& ObjectValue() const override;
+  Json::type Type() const override;
+  void Dump(std::string* out, bool break_line, int space,
+            int indent) const override;
 
  private:
   Json::Object value_;
@@ -349,19 +376,24 @@ const Json& JsonObject::operator[](const std::string& key) const {
   return iter == value_.end() ? default_json : iter->second;
 }
 
-void JsonObject::Dump(std::string* out) const {
+void JsonObject::Dump(std::string* out, bool break_line, int space,
+                      int indent) const {
   bool add_comma = false;
-  out->append(1, '{');
+  StringPrintfAppend(out, "%*s{%s", space, "", break_line ? "\n" : "");
   for (const auto& obj_pair : value_) {
     if (add_comma) {
-      out->append(", ");
+      out->append(break_line ? ",\n" : ", ");
     }
+    StringPrintfAppend(out, "%*s", space + indent, "");
     DumpString(obj_pair.first, out);
-    out->append(": ");
-    obj_pair.second.GetJsonValue()->Dump(out);
+
+    out->append(break_line ? ":\n" : ": ");
+    obj_pair.second.GetJsonValue()->Dump(out, break_line, space + indent,
+                                         indent);
     add_comma = true;
   }
-  out->append(1, '}');
+  if (!value_.empty() && break_line) out->append(1, '\n');
+  StringPrintfAppend(out, "%*s}", space, "");
 }
 
 bool JsonParser::Parse() {
