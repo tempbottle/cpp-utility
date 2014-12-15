@@ -18,5 +18,8 @@ bool EncodeUTF8(int64 code, std::string* out);
 // Return -1 if the sequence is a invalid UTF8 code.
 int64 DecodeUTF8(const char* seq, size_t len);
 int64 DecodeUTF8(const std::string& seq);
+// Decode an UTF8 stream to a code point.
+// Return the number character comsume or -1 if the sequence is invalid.
+int DecodeUTF8CodePoint(const char* seq, size_t len, int64* code_point);
 
 #endif  // STRINGS_ENCODING_H_

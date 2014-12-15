@@ -40,6 +40,25 @@ TEST(Encoding, UTF8DecodeGood) {
   }
 }
 
+TEST(Encoding, DecodeUTF8CodePointTest) {
+  std::string utf8 = u8"\u0030\u0080\u0800\U00010000";
+  size_t length = utf8.size();
+  int64 code_point;
+  int len = 0;
+  len += DecodeUTF8CodePoint(utf8.c_str() + len, length - len, &code_point);
+  ASSERT_EQ(1, len);
+  EXPECT_EQ(0x30, code_point);
+  len += DecodeUTF8CodePoint(utf8.c_str() + len, length - len, &code_point);
+  ASSERT_EQ(3, len);
+  EXPECT_EQ(0x80, code_point);
+  len += DecodeUTF8CodePoint(utf8.c_str() + len, length - len, &code_point);
+  ASSERT_EQ(6, len);
+  EXPECT_EQ(0x0800, code_point);
+  len += DecodeUTF8CodePoint(utf8.c_str() + len, length - len, &code_point);
+  ASSERT_EQ(10, len);
+  EXPECT_EQ(0x10000, code_point);
+}
+
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();

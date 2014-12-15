@@ -25,11 +25,14 @@ bool EncodeUTF8(int64 code_point, std::string* out) {
   return true;
 }
 
+namespace {
+const char pfx0 = 0xC0, msb0 = 0x80;
+const char pfx1 = 0xE0, msb1 = 0xC0;
+const char pfx2 = 0xF0, msb2 = 0xE0;
+const char pfx3 = 0xF8, msb3 = 0xF0;
+}
+
 int64 DecodeUTF8(const char* seq, size_t len) {
-  static const char pfx0 = 0xC0, msb0 = 0x80;
-  static const char pfx1 = 0xE0, msb1 = 0xC0;
-  static const char pfx2 = 0xF0, msb2 = 0xE0;
-  static const char pfx3 = 0xF8, msb3 = 0xF0;
   int64 code_point = 0;
   if (len == 1) {
     if ((seq[0] & 0x80) != 0x00) return -1;
@@ -61,3 +64,26 @@ int64 DecodeUTF8(const char* seq, size_t len) {
 int64 DecodeUTF8(const std::string& seq) {
   return DecodeUTF8(seq.data(), seq.size());
 }
+
+int DecodeUTF8CodePoint(const char* seq, size_t len, int64* code_point) {
+  int consume_length = -1;
+  if ((seq[0] & 0x80) == 0) {
+    consume_length = 1;
+  } else if ((seq[0] & pfx1) == msb1) {
+    consume_length = 2;
+  } else if ((seq[0] & pfx2) == msb2) {
+    consume_length = 3;
+  } else if ((seq[0] & pfx3) == msb3) {
+    consume_length = 4;
+  } else {
+    return -1;
+  }
+  int cp = DecodeUTF8(seq, consume_length);
+  if (cp == -1) {
+    return -1;
+  } else {
+    *code_point = cp;
+    return consume_length;
+  }
+}
+
