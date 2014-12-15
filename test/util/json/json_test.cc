@@ -85,8 +85,7 @@ TEST(JsonTest, ParseJsonStringGood) {
   ASSERT_TRUE(json.Parse(utf8_string));
   EXPECT_EQ(Json::JSTRING, json.Type());
   EXPECT_EQ("\xC2\x80\xE0\xA0\x80", json.StringValue());
-  // TODO(ronaflx): enable this test case.
-  // EXPECT_EQ("\"\\u0080\\u0800\"", json.Dump());
+  EXPECT_EQ(utf8_string, json.Dump());
 }
 
 TEST(JsonTest, ParseJsonStringBad) {

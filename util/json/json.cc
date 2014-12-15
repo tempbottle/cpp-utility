@@ -33,7 +33,7 @@ static void DumpString(const std::string& value, std::string* out) {
   out->append(1, '\"');
   size_t value_size = value.size();
   for (size_t i = 0; i < value_size; i++) {
-    char ch = value[i];
+    unsigned char ch = value[i];
     size_t escape_id = std::find(kEscChar, kEscChar + kEscSize, ch) - kEscChar;
     if (escape_id != kEscSize) {
       out->append(KEscString[escape_id]);
@@ -50,7 +50,18 @@ static void DumpString(const std::string& value, std::string* out) {
                static_cast<unsigned char>(value[i + 2]) == 0xa9) {
       out->append("\\u2029");
     } else {
-      out->append(1, ch);
+      int64 code_point;
+      int len =
+          DecodeUTF8CodePoint(value.c_str() + i, value.size() - i, &code_point);
+      if (len != -1) {
+        // TODO(ronaflx): Support other character beside BMP.
+        if (code_point < 0x80) {
+          out->append(1, code_point);
+        } else {
+          StringPrintfAppend(out, "\\u%04x", code_point);
+        }
+        i += len - 1;
+      }
     }
   }
   out->append(1, '\"');
