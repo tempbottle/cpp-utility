@@ -17,6 +17,9 @@ target_link_libraries(copy_on_write_test gtest)
 add_executable(statistics_test statistics_test.cc)
 target_link_libraries(statistics_test gtest)
 
+add_executable(lazy_ptr_test lazy_ptr_test.cc)
+target_link_libraries(lazy_ptr_test gtest boost_thread-mt boost_system-mt)
+
 add_test(registerer_test registerer_test)
 add_test(singleton_test singleton_test)
 add_test(comparator_test comparator_test)
