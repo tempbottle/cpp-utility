@@ -18,9 +18,7 @@
 // This class is not thread-safe except for initialization.
 
 #include <functional>
-#include <boost/thread/once.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/function.hpp>
+#include <mutex>
 #include <tuple>
 
 template <typename Type, typename... Args>
@@ -28,15 +26,13 @@ class LazyPtr {
  public:
   typedef Type value_type;
   LazyPtr(const Args&... args)
-      : args_(std::make_tuple(args...)),
-        ptr_(nullptr),
-        module_init_(BOOST_ONCE_INIT) {}
+      : args_(std::make_tuple(args...)), ptr_(nullptr) {}
 
   Type& operator*() const { return *get(); }
   Type* operator->() const { return get(); }
 
   Type* get() const {
-    boost::call_once(module_init_, std::bind(&LazyPtr::InitModule, this));
+    std::call_once(module_init_, std::bind(&LazyPtr::InitModule, this));
     return ptr_;
   }
 
@@ -62,7 +58,7 @@ class LazyPtr {
 
   std::tuple<Args...> args_;
   mutable Type* ptr_;
-  mutable boost::once_flag module_init_;
+  mutable std::once_flag module_init_;
 
   // Disallow copy constructor.
   LazyPtr(const LazyPtr&);
