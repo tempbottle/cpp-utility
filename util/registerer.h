@@ -2,8 +2,6 @@
 #ifndef UTIL_REGISTERER_H_
 #define UTIL_REGISTERER_H_
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <functional>
 #include <map>

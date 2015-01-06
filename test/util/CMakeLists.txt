@@ -6,7 +6,7 @@ add_executable(registerer_test registerer_test.cc)
 target_link_libraries(registerer_test gtest pthread)
 
 add_executable(singleton_test singleton_test.cc)
-target_link_libraries(singleton_test gtest pthread boost_thread-mt boost_system-mt)
+target_link_libraries(singleton_test gtest pthread)
 
 add_executable(comparator_test comparator_test.cc)
 target_link_libraries(comparator_test gtest pthread)
