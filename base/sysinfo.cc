@@ -5,16 +5,16 @@
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 #endif
+#include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <unistd.h>
+#include <mutex>
 
-#include <boost/thread/once.hpp>
-#include <boost/thread/thread.hpp>
 #include <cstdio>
 #include "base/macros.h"
 #include "base/cycleclock.h"
 
-static boost::once_flag cpuinfo_init = BOOST_ONCE_INIT;
+static std::once_flag cpuinfo_init;  
 
 static double cpuinfo_cycles_per_second = 1.0;
 static double cpuinfo_time_base_frequency = 1.0;
@@ -41,17 +41,17 @@ static void InitializeSystemInfo() {
 }
 
 double NominalCPUFrequency() {
-  boost::call_once(cpuinfo_init, InitializeSystemInfo);
+  std::call_once(cpuinfo_init, InitializeSystemInfo);
   return cpuinfo_cycles_per_second;
 }
 
 int NumCPUs() {
-  boost::call_once(cpuinfo_init, InitializeSystemInfo);
+  std::call_once(cpuinfo_init, InitializeSystemInfo);
   return cpuinfo_num_cpus;
 }
 
 double CycleClockFrequency() {
-  boost::call_once(cpuinfo_init, InitializeSystemInfo);
+  std::call_once(cpuinfo_init, InitializeSystemInfo);
   return cpuinfo_time_base_frequency;
 }
 
