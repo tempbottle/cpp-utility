@@ -3,22 +3,22 @@ add_subdirectory(csv)
 add_subdirectory(json)
 
 add_executable(registerer_test registerer_test.cc)
-target_link_libraries(registerer_test gtest)
+target_link_libraries(registerer_test gtest pthread)
 
 add_executable(singleton_test singleton_test.cc)
-target_link_libraries(singleton_test gtest boost_thread-mt boost_system-mt)
+target_link_libraries(singleton_test gtest pthread boost_thread-mt boost_system-mt)
 
 add_executable(comparator_test comparator_test.cc)
-target_link_libraries(comparator_test gtest)
+target_link_libraries(comparator_test gtest pthread)
 
 add_executable(copy_on_write_test copy_on_write_test.cc)
-target_link_libraries(copy_on_write_test gtest)
+target_link_libraries(copy_on_write_test gtest pthread)
 
 add_executable(statistics_test statistics_test.cc)
-target_link_libraries(statistics_test gtest)
+target_link_libraries(statistics_test gtest pthread)
 
 add_executable(lazy_ptr_test lazy_ptr_test.cc)
-target_link_libraries(lazy_ptr_test gtest)
+target_link_libraries(lazy_ptr_test gtest pthread)
 
 add_test(registerer_test registerer_test)
 add_test(singleton_test singleton_test)

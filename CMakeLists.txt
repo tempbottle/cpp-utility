@@ -35,7 +35,7 @@ set (CPP_UTILITY_VERSION_MINOR 0)
 
 # Compiler flags.
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall")
-set (GCC_COVERAGE_LINK_FLAGS    "-pthread")
+set (GCC_COVERAGE_LINK_FLAGS "-pthread")
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/cpp-utility-config.h.in"
