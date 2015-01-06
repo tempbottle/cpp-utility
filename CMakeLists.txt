@@ -15,6 +15,7 @@ ExternalProject_Add(googletest
     SOURCE_DIR "${CMAKE_BINARY_DIR}/third_party/gtest"
     INSTALL_COMMAND "")
 ExternalProject_Get_Property(googletest source_dir)
+include_directories(${source_dir}/include)
 ExternalProject_Get_Property(googletest binary_dir)
 link_directories(${binary_dir})
 
@@ -24,6 +25,7 @@ ExternalProject_Add(googlemock
     SOURCE_DIR "${CMAKE_BINARY_DIR}/third_party/gmock"
     INSTALL_COMMAND "")
 ExternalProject_Get_Property(googlemock source_dir)
+include_directories(${source_dir}/include)
 ExternalProject_Get_Property(googlemock binary_dir)
 link_directories(${binary_dir})
 
@@ -32,7 +34,7 @@ set (CPP_UTILITY_VERSION_MAJOR 1)
 set (CPP_UTILITY_VERSION_MINOR 0)
 
 # Compiler flags.
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -pthread")
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/cpp-utility-config.h.in"
