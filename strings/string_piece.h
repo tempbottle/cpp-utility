@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 #include <iterator>
 #include <memory>
