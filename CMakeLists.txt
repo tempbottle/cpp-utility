@@ -45,6 +45,19 @@ configure_file(
 # Set up directories
 include_directories("${PROJECT_BINARY_DIR}")
 
+#  Set OS
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  add_definitions(-DOS_MACOSX)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  add_definitions(-DOS_LINUX)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  add_definitions(-DOS_WINDOWS)
+endif()
+
 # for all library
 add_subdirectory(base)
 add_subdirectory(util)
