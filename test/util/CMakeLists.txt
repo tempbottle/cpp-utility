@@ -20,6 +20,9 @@ target_link_libraries(statistics_test gtest pthread)
 add_executable(lazy_ptr_test lazy_ptr_test.cc)
 target_link_libraries(lazy_ptr_test gtest pthread)
 
+add_executable(auto_cleaner_test auto_cleaner_test.cc)
+target_link_libraries(auto_cleaner_test gtest pthread)
+
 add_test(registerer_test registerer_test)
 add_test(singleton_test singleton_test)
 add_test(comparator_test comparator_test)

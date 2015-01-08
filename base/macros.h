@@ -2,6 +2,8 @@
 #ifndef BASE_MACROS_H_
 #define BASE_MACROS_H_
 
+#include <cstddef>
+
 // disallow copy an assign in class, use in private field.
 #if LANG_CXX11 && !defined(__clang__)
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
